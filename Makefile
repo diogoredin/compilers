@@ -1,4 +1,5 @@
 CFLAGS=-g -c -DYYDEBUG
+EXT=diy
 LIB=-I lib
 LANG=diy
 
@@ -17,9 +18,10 @@ generate:
 	gcc -o $(LANG) y.tab.o lex.yy.o $(LIB) -lutil -lfl
 
 clean:
-	rm -f y.output y.tab.c y.tab.h
+	rm -f y.output y.tab.c y.tab.h lex.yy.c
 	rm -f *.o
 	rm -f $(LANG)
+	rm -f .DS_Store
 	clear
 
 zip:
