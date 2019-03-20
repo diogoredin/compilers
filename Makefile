@@ -3,7 +3,7 @@ EXT=diy
 LIB=-I lib
 LANG=diy
 
-all: flex yacc link generate
+all: flex yacc link generate execute
 
 flex:
 	flex -l $(LANG).l
@@ -17,11 +17,14 @@ link:
 generate:
 	gcc -o $(LANG) y.tab.o lex.yy.o $(LIB) -lutil -lfl
 
+execute:
+	./diy hello.diy
+
 clean:
 	rm -f y.output y.tab.c y.tab.h lex.yy.c
 	rm -f *.o
-	rm -f $(LANG)
 	rm -f .DS_Store
+	rm -f $(LANG)
 	clear
 
 zip:
