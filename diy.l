@@ -15,25 +15,14 @@ char *dupstr(const char *s);
 
 %%
 
-"--".*				;
+--.*				;
 [ \t\n]+			;
 
 \=<					BEGIN(dCMT);
 <dCMT>(.|\n)		;
 <dCMT>=>			BEGIN(INITIAL);
 
-\"				BEGIN dSTR;
-<dSTR>\"		BEGIN 0; return STRING;
-<dSTR>"*n"		strcat(yylval.s, "\n");
-<dSTR>"*t"		strcat(yylval.s, "\t");
-<dSTR>"*0"		strcat(yylval.s, "\0");
-<dSTR>"*("		strcat(yylval.s, "{");
-<dSTR>"*)"		strcat(yylval.s, "}");
-<dSTR>\*[*'"]	strcat(yylval.s, yytext+1);
-<dSTR>\*.		yyerror("Invalid escape sequence in string.");
-<dSTR>.|\n		strcat(yylval.s, yytext);
-
-"void"			return PRINT;
+"void"			return VOID;
 "integer"		return INTEGER;
 "string"		return STRING;
 "public"		return PUBLIC;
@@ -51,6 +40,17 @@ char *dupstr(const char *s);
 "downto"		return DOWNTO;
 "break"			return BREAK;
 "continue"		return CONTINUE;
+
+\"				BEGIN dSTR;
+<dSTR>\"		BEGIN 0; return STR;
+<dSTR>"*n"		strcat(yylval.s, "\n");
+<dSTR>"*t"		strcat(yylval.s, "\t");
+<dSTR>"*0"		strcat(yylval.s, "\0");
+<dSTR>"*("		strcat(yylval.s, "{");
+<dSTR>"*)"		strcat(yylval.s, "}");
+<dSTR>\*[*'"]	strcat(yylval.s, yytext+1);
+<dSTR>\*.		yyerror("Invalid escape sequence in string.");
+<dSTR>.|\n		strcat(yylval.s, yytext);
 
 [0-9]+			yylval.i = strtol(yytext, 0, 10);		return INT;
 [a-zA-Z_\b][a-zA-Z_\b0-9]* yylval.s = dupstr(yytext);	return ID;

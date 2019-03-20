@@ -3,43 +3,31 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+
 #include "node.h"
 #include "y.tab.h"
+
 #ifndef YYERRCODE
 #define YYERRCODE 256
 #endif
 #define YYDEBUG 1
+
+void evaluate(Node *p);
+void yyerror(char *s);
 extern int yylex();
 extern FILE *yyin;
-void yyerror(char *s);
+
 %}
 
 %union {
 	int i;
 	char *s;
+	Node *n;
 };
 
 %token<i> INT
 %token<s> ID STR
-
-%token PRINT
-%token INTEGER
-%token STRING
-%token PUBLIC
-%token NUMBER
-%token CONST
-%token IF
-%token THEN
-%token ELSE
-%token WHILE
-%token DO
-%token FOR
-%token IN
-%token STEP
-%token UPTO
-%token DOWNTO
-%token BREAK
-%token CONTINUE
+%token VOID INTEGER STRING PUBLIC NUMBER CONST IF THEN ELSE WHILE DO FOR IN STEP UPTO DOWNTO BREAK CONTINUE
 
 %%
 start:;
@@ -49,12 +37,24 @@ char *dupstr(const char*s) { return strdup(s); }
 
 int main(int argc, char *argv[]) {
 
+	extern YYSTYPE yylval;
+	int tk;
+
 	yyin = fopen(argv[1], "r");
 	
 	if ( yyin==NULL ) {
 		fclose(yyin);
+
 	} else {
-		yyparse();
+
+	    while (tk = yylex()) {
+			if (tk > YYERRCODE)
+			    printf("%d:\t%s\n", tk, yyname[tk]);
+		    else
+			    printf("%d:\t%c\n", tk, tk);
+		}
+
+		return 0;
 	}
 
 }
