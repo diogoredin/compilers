@@ -1,25 +1,26 @@
+CFLAGS=-g -c -DYYDEBUG
+LIB=-I lib
 LANG=diy
-EXT=diy # file extension: .$(EXT)
-LIB=lib # compiler library directory
-UTIL=util # compiler library: lib$(LIB).a
-RUN=run # runtime directory
-EXS=exs # examples directory
-CC=gcc
-CFLAGS=-g -DYYDEBUG
 
+all: flex yacc link generate
 
-$(LANG): $(LANG).y $(LANG).l $(LANG).brg
-	make -C $(LIB)
-	byacc -dv $(LANG).y
+flex:
 	flex -l $(LANG).l
-	pburg -T $(LANG).brg
-	$(LINK.c) -o $(LANG) $(ARCH) -I$(LIB) lex.yy.c y.tab.c yyselect.c -L$(LIB) -l$(UTIL)
 
-examples:: $(LANG)
-	make -C $(EXS)
+yacc:
+	yacc -dv inicial.y
 
-clean::
-	make -C $(LIB) clean
-	make -C $(RUN) clean
-	make -C $(EXS) clean
-	rm -f *.o $(LANG) lex.yy.c y.tab.c y.tab.h y.output yyselect.c *.asm *~
+link:
+	gcc $(CFLAGS) $(LIB) y.tab.c lex.yy.c
+
+generate:
+	gcc -o $(LANG) y.tab.o lex.yy.o $(LIB) -lutil -lfl
+
+clean:
+	rm -f y.output y.tab.c y.tab.h
+	rm -f *.o
+	rm -f $(LANG)
+	clear
+
+zip:
+	zip proj diy.l inicial.y string.diy iter.diy recurs.diy factorial.diy rand.diy mean.diy
