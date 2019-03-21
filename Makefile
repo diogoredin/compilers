@@ -9,7 +9,7 @@ flex:
 	flex -l $(LANG).l
 
 yacc:
-	yacc -dv inicial.y
+	byacc -dv inicial.y
 
 link:
 	gcc $(CFLAGS) $(LIB) y.tab.c lex.yy.c
@@ -18,7 +18,7 @@ generate:
 	gcc -o $(LANG) y.tab.o lex.yy.o $(LIB) -lutil -lfl
 
 execute:
-	./diy hello.diy
+	./diy ack.diy
 
 clean:
 	rm -f y.output y.tab.c y.tab.h lex.yy.c

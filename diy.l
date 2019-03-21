@@ -102,7 +102,7 @@ int comment_nest = 0;
 \\n		return LF;
 
 . {
-	char error[yyleng+20]; 
+	char error[yyleng+20];
 	strcpy(error, "Unknown character: ");
 	strcat(error, yytext); 
 	yyerror(error);
