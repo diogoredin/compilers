@@ -1,5 +1,3 @@
-%option stack noyywrap yylineno 8bit
-
 %{
 #include <stdlib.h> 
 #include <string.h>
@@ -9,18 +7,22 @@
 
 void yyerror(char *s);
 char *dupstr(const char *s);
+
+int comment_nest = 0;
 %}
 
-%X dCMT dSTR
+%X iCOM iSTR
 
 %%
 
---.*				;
-[ \t\n]+			;
+"=<"			BEGIN(iCOM); comment_nest++;
+<iCOM>[^*/]*	; /* Ignore any tokens inside except other comments */
+<iCOM>"=<"		comment_nest++;
+<iCOM>"=>"		if (--comment_nest == 0) BEGIN 0;
+<iCOM>[=>]		; /* Already decreased nest so nothing to do */
 
-\=<					BEGIN(dCMT);
-<dCMT>(.|\n)		;
-<dCMT>=>			BEGIN(INITIAL);
+==.*			;
+[ \n\r\t]+		;
 
 "void"			return VOID;
 "integer"		return INTEGER;
@@ -40,20 +42,6 @@ char *dupstr(const char *s);
 "downto"		return DOWNTO;
 "break"			return BREAK;
 "continue"		return CONTINUE;
-
-\"				BEGIN dSTR;
-<dSTR>\"		BEGIN 0; return STR;
-<dSTR>"*n"		strcat(yylval.s, "\n");
-<dSTR>"*t"		strcat(yylval.s, "\t");
-<dSTR>"*0"		strcat(yylval.s, "\0");
-<dSTR>"*("		strcat(yylval.s, "{");
-<dSTR>"*)"		strcat(yylval.s, "}");
-<dSTR>\*[*'"]	strcat(yylval.s, yytext+1);
-<dSTR>\*.		yyerror("Invalid escape sequence in string.");
-<dSTR>.|\n		strcat(yylval.s, yytext);
-
-[0-9]+			yylval.i = strtol(yytext, 0, 10);		return INT;
-[a-zA-Z_\b][a-zA-Z_\b0-9]* yylval.s = dupstr(yytext);	return ID;
 
 .				yyerror("Unknown character.");
 %%
