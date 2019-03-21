@@ -91,7 +91,11 @@ int comment_nest = 0;
 	return REAL;
 }
 
-.									yyerror("Unknown character.");
+([-+*/%<>=!|&~]){1}								ECHO;
+(<[=>]?|:=|\+\+|\-\-|>=?)						ECHO;
+[\'\#\{\}\(\)\[\]\;\,]							ECHO;
+
+.									printf("Unknown character---->%s", yytext);
 %%
 
 void yyerror (char *s) {
