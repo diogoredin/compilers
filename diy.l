@@ -16,10 +16,9 @@ int comment_nest = 0;
 %%
 
 "=<"			BEGIN(iCOM); comment_nest++;
-<iCOM>[^=>]*	; /* Ignore any tokens inside except other comments */
+<iCOM>[^=>]+	; /* Ignore any tokens inside except other comments */
 <iCOM>"=<"		comment_nest++;
 <iCOM>"=>"		if (--comment_nest == 0) BEGIN 0;
-<iCOM>[=>]		; /* Already decreased nest so nothing to do */
 
 ==.*			;
 [ \n\r\t]+		;
@@ -62,6 +61,16 @@ int comment_nest = 0;
 	if (errno == ERANGE) yyerror("Binary integer overflow.");
 	return INT;
 }
+
+\"([^*"]|\*.)*\"								yylval.s = malloc(yyleng); *yylval.s = 0; REJECT; /* Allows concatenation */
+\"												BEGIN iSTR;
+<iSTR>["]{1}									BEGIN 0; return STRING;
+<iSTR>[0-9A-Za-z\u00C0-\u00D5\u00D8-\u00f0]+	strcat(yylval.s, yytext); /* Best range I figured for ISO-LATIN-15 */
+<iSTR>\\\"{1}									strcat(yylval.s, yytext); /* Allow slash */
+<iSTR>"\n"|"\r"|"\t"							strcat(yylval.s, yytext); /* Allow LF, CR and HT */
+<iSTR>\\\*[0-9a-fA-F]{1,2}						strcat(yylval.s, yytext); /* Allow hex digits */
+<iSTR>\x0|"0"									strcat(yylval.s, yytext); /* NULL or ZERO */
+<iSTR>.|\n										strcat(yylval.s, yytext); /* Absorb redundancies */
 
 .									yyerror("Unknown character.");
 %%
