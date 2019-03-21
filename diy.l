@@ -2,7 +2,6 @@
 #include <stdlib.h> 
 #include <string.h>
 #include <errno.h>
-#include "node.h"
 #include "y.tab.h"
 
 void yyerror(char *s);
@@ -64,7 +63,7 @@ int comment_nest = 0;
 
 \"([^*"]|\*.)*\"								yylval.s = malloc(yyleng); *yylval.s = 0; REJECT; /* Allows concatenation */
 \"												BEGIN iSTR;
-<iSTR>["]{1}									BEGIN 0; return STRING;
+<iSTR>["]{1}									BEGIN 0; return STR;
 <iSTR>[0-9A-Za-z\u00C0-\u00D5\u00D8-\u00f0]+	strcat(yylval.s, yytext); /* Best range I figured for ISO-LATIN-15 */
 <iSTR>\\\"{1}									strcat(yylval.s, yytext); /* Allow slash */
 <iSTR>"\n"|"\r"|"\t"							strcat(yylval.s, yytext); /* Allow LF, CR and HT */
@@ -92,7 +91,7 @@ int comment_nest = 0;
 }
 
 ([\-\+\*\/\%\<\>\=\!\|\&\~]){1} 	return *yytext;
-([\'\#\{\}\(\)\[\]\;\,\\n]){1}		return *yytext;
+([\'\#\{\}\(\)\[\]\;\,]){1}			return *yytext;
 
 ">="	return GE;
 "<="	return LE;
@@ -100,6 +99,7 @@ int comment_nest = 0;
 ":="	return ASSIGN;
 "++"	return INC;
 "--"	return DEC;
+\\n		return LF;
 
 . {
 	char error[yyleng+20]; 
@@ -110,8 +110,8 @@ int comment_nest = 0;
 
 %%
 
+char *getyytext() { return yytext; }
+
 void yyerror(char *s) {
 	fprintf(stderr, "%s\n", s);
 }
-
-char *getyytext() { return yytext; }

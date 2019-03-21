@@ -4,7 +4,6 @@
 #include <stdarg.h>
 #include <string.h>
 
-#include "node.h"
 #include "y.tab.h"
 
 #ifndef YYERRCODE
@@ -12,7 +11,6 @@
 #endif
 #define YYDEBUG 1
 
-void evaluate(Node *p);
 void yyerror(char *s);
 extern int yylex();
 extern FILE *yyin;
@@ -24,14 +22,13 @@ extern FILE *yyin;
 	float fp;
 	int exp;
 	char *s;
-	Node *n;
 };
 
 %token<i> INT
 %token<s> ID STR
 %token<n> REAL
 %token VOID INTEGER STRING PUBLIC NUMBER CONST IF THEN ELSE WHILE DO FOR IN STEP UPTO DOWNTO BREAK CONTINUE
-%token GE LE EQ ASSIGN INC DEC
+%token GE LE EQ ASSIGN INC DEC LF
 
 %%
 start:;

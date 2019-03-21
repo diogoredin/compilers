@@ -20,3 +20,5 @@ public integer entry (integer argc, string *argv, string *envp) {
   }
   entry := 0
 };
+
+\n
