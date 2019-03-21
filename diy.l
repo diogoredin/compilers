@@ -44,7 +44,7 @@ int comment_nest = 0;
 
 [a-z][a-z0-9_]*|[A-Z][A-Z0-9_]*		yylval.s = dupstr(yytext); return ID;
 
-([1-9][0-9]*|0) {
+([1-9][0-9]*|0)	{
 	errno = 0; yylval.i = strtol(yytext, NULL, 10);
 	if (errno == ERANGE) yyerror("Decimal integer overflow.");
 	return INT;
@@ -70,7 +70,26 @@ int comment_nest = 0;
 <iSTR>"\n"|"\r"|"\t"							strcat(yylval.s, yytext); /* Allow LF, CR and HT */
 <iSTR>\\\*[0-9a-fA-F]{1,2}						strcat(yylval.s, yytext); /* Allow hex digits */
 <iSTR>\x0|"0"									strcat(yylval.s, yytext); /* NULL or ZERO */
-<iSTR>.|\n										strcat(yylval.s, yytext); /* Absorb redundancies */
+<iSTR>.|\n										strcat(yylval.s, yytext); /* Absorb redundancies 	printf("%d.%lfe%d", yylval.i, yylval.fp, yylval.exp);*/
+
+(([1-9][0-9]*|0){1}\.{1}[0-9]+(\e[0-9]+)*)	{
+	errno = 0;
+
+	char *parseFloat = strtok(yytext, ".");
+	parseFloat = strtok(NULL, ".");
+
+	char *parseExponential = strtok(parseFloat, "e");
+	parseExponential = strtok(NULL, "e");
+
+	yylval.i = strtol(yytext, NULL, 10);
+	yylval.fp = strtol(parseFloat, NULL, 10);
+
+	if( parseExponential != NULL )
+		yylval.exp = strtol(parseExponential, NULL, 10);
+
+	if (errno == ERANGE) yyerror("Real overflow.");
+	return REAL;
+}
 
 .									yyerror("Unknown character.");
 %%

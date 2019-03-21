@@ -21,12 +21,15 @@ extern FILE *yyin;
 
 %union {
 	int i;
+	float fp;
+	int exp;
 	char *s;
 	Node *n;
 };
 
 %token<i> INT
 %token<s> ID STR
+%token<n> REAL
 %token VOID INTEGER STRING PUBLIC NUMBER CONST IF THEN ELSE WHILE DO FOR IN STEP UPTO DOWNTO BREAK CONTINUE
 
 %%
