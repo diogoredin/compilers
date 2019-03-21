@@ -70,7 +70,7 @@ int comment_nest = 0;
 <iSTR>"\n"|"\r"|"\t"							strcat(yylval.s, yytext); /* Allow LF, CR and HT */
 <iSTR>\\\*[0-9a-fA-F]{1,2}						strcat(yylval.s, yytext); /* Allow hex digits */
 <iSTR>\x0|"0"									strcat(yylval.s, yytext); /* NULL or ZERO */
-<iSTR>.|\n										strcat(yylval.s, yytext); /* Absorb redundancies 	printf("%d.%lfe%d", yylval.i, yylval.fp, yylval.exp);*/
+<iSTR>.|\n										strcat(yylval.s, yytext); /* Absorb redundancies */
 
 (([1-9][0-9]*|0){1}\.{1}[0-9]+(\e[0-9]+)*)	{
 	errno = 0;
@@ -91,14 +91,26 @@ int comment_nest = 0;
 	return REAL;
 }
 
-([-+*/%<>=!|&~]){1}								ECHO;
-(<[=>]?|:=|\+\+|\-\-|>=?)						ECHO;
-[\'\#\{\}\(\)\[\]\;\,]							ECHO;
+([\-\+\*\/\%\<\>\=\!\|\&\~]){1} 	return *yytext;
+([\'\#\{\}\(\)\[\]\;\,\\n]){1}		return *yytext;
 
-.									printf("Unknown character---->%s", yytext);
+">="	return GE;
+"<="	return LE;
+"<>"	return EQ;
+":="	return ASSIGN;
+"++"	return INC;
+"--"	return DEC;
+
+. {
+	char error[yyleng+20]; 
+	strcpy(error, "Unknown character: ");
+	strcat(error, yytext); 
+	yyerror(error);
+}
+
 %%
 
-void yyerror (char *s) {
+void yyerror(char *s) {
 	fprintf(stderr, "%s\n", s);
 }
 
