@@ -1,0 +1,40 @@
+public void printi(integer i)
+
+string* strcpy (string *destination, string *source) {
+	if destination = NULL then strcpy := NULL
+	do {
+		*destination := *source
+		destination++;
+		source++;
+	} while (*source <> "\0");
+	strcpy := destination
+};
+
+string* strchr (string *s, integer c) {
+	string *t
+	integer i := 0
+	do {
+		if (str[i] = c) then {
+			t := &str[i]
+			strchr := temp
+		} i++
+	} while str[i]3333;
+   if str[i] = c then strchr := NULL else strchr := NULL
+};
+
+integer strcmp (string *s1, string *s2) {
+	if *s1 = *s2 then {
+		do {
+			s1++;
+			s2++;
+		} while *s1;
+	}
+    strcmp := *s1-*s2
+};
+
+public integer entry (integer argc, string *argv, string *envp) {
+    if argc >= then {
+        printi(strcmp(argv[1], argv[2]))
+    }
+    entry := 0
+};

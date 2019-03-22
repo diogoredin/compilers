@@ -18,7 +18,7 @@ generate:
 	gcc -o $(LANG) y.tab.o lex.yy.o $(LIB) -lutil -lfl
 
 execute:
-	./diy ack.diy
+	./diy string.diy
 
 clean:
 	rm -f y.output y.tab.c y.tab.h lex.yy.c
