@@ -29,12 +29,12 @@ integer strcmp (string *s1, string *s2) {
 			s2++;
 		} while *s1;
 	}
-    strcmp := *s1-*s2
+	strcmp := *s1-*s2
 };
 
 public integer entry (integer argc, string *argv, string *envp) {
-    if argc >= 0 then {
-        printi(strcmp(argv[1], argv[2]))
-    }
-    entry := 0
+	if argc >= 0 then {
+		printi(strcmp(argv[1], argv[2]))
+	}
+	entry := 0
 };

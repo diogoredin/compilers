@@ -42,17 +42,17 @@ int main(int argc, char *argv[]) {
 	int tk;
 
 	yyin = fopen(argv[1], "r");
-	
+
 	if ( yyin==NULL ) {
 		fclose(yyin);
 
 	} else {
 
-	    while (tk = yylex()) {
+		while (tk = yylex()) {
 			if (tk > YYERRCODE)
-			    printf("%d:\t%s\n", tk, yyname[tk]);
-		    else
-			    printf("%d:\t%c\n", tk, tk);
+				printf("%d:\t%s\n", tk, yyname[tk]);
+			else
+				printf("%d:\t%c\n", tk, tk);
 		}
 
 		return 0;

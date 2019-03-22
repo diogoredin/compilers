@@ -2,11 +2,11 @@ public void printr(real r)
 public real factorial(integer n)
 
 public integer entry (integer argc, string *argv, string *envp) {
-    if argc >= 0 then {
-        real r := factorial(argv[1])
-    } else {
-        factorial(5)
-    }
-    printr(r)
-    entry := 0
+	if argc >= 0 then {
+		real r := factorial(argv[1])
+	} else {
+		factorial(5)
+	}
+	printr(r)
+	entry := 0
 };

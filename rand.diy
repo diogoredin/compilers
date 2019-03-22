@@ -1,13 +1,13 @@
 integer x := 100003;
 public void srand (integer i) {
-    x := i
+	x := i
 }
 
 public integer rand () {
 	integer mul := 27983
-    integer incr := 149
-    integer mod := 1000000
+	integer incr := 149
+	integer mod := 1000000
 
-    x := (x*mul+incr)%mod
-    rand := x
+	x := (x*mul+incr)%mod
+	rand := x
 }

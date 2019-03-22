@@ -1,5 +1,5 @@
 %{
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include "y.tab.h"
@@ -104,7 +104,7 @@ int comment_nest = 0;
 . {
 	char error[yyleng+20];
 	strcpy(error, "Unknown character: ");
-	strcat(error, yytext); 
+	strcat(error, yytext);
 	yyerror(error);
 }
 
