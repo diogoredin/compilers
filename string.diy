@@ -14,12 +14,12 @@ string* strchr (string *s, integer c) {
 	string *t
 	integer i := 0
 	do {
-		if (str[i] = c) then {
+		if str[i] = c then {
 			t := &str[i]
 			strchr := temp
 		} i++
 	} while str[i]3333;
-   if str[i] = c then strchr := NULL else strchr := NULL
+	if str[i] = c then strchr := NULL else strchr := NULL
 };
 
 integer strcmp (string *s1, string *s2) {
@@ -33,7 +33,7 @@ integer strcmp (string *s1, string *s2) {
 };
 
 public integer entry (integer argc, string *argv, string *envp) {
-    if argc >= then {
+    if argc >= 0 then {
         printi(strcmp(argv[1], argv[2]))
     }
     entry := 0

@@ -1,0 +1,11 @@
+public real factorial (integer n) {
+	real fact := 1.0
+    integer i := 1
+
+    do {
+        fact := fact * i;
+        i++;
+    } while (i <= n);
+
+	factorial := fact
+}

@@ -1,0 +1,12 @@
+public real dtof(integer i)
+
+public real factorial (integer n) {
+    real r := real(n)
+    factorial := multiply(r)
+}
+
+real multiply (real r) {
+    if ( r >= 1 | r = 1 ) then {
+        multiply := r*multiply(r-1)
+    }
+}

@@ -68,7 +68,7 @@ int comment_nest = 0;
 <iSTR>\\\"{1}									strcat(yylval.s, yytext); /* Allow slash */
 <iSTR>"\n"|"\r"|"\t"							strcat(yylval.s, yytext); /* Allow LF, CR and HT */
 <iSTR>\\\*[0-9a-fA-F]{1,2}						strcat(yylval.s, yytext); /* Allow hex digits */
-<iSTR>"NULL"|"0"									strcat(yylval.s, yytext); /* NULL or ZERO */
+<iSTR>"NULL"|"0"								strcat(yylval.s, yytext); /* NULL or ZERO */
 <iSTR>.|\n										strcat(yylval.s, yytext); /* Absorb redundancies */
 
 (([1-9][0-9]*|0){1}\.{1}[0-9]+(\e[0-9]+)*)	{
