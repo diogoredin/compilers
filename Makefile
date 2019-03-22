@@ -3,7 +3,7 @@ EXT=diy
 LIB=-I lib
 LANG=diy
 
-all: flex yacc link generate execute
+all: flex yacc link generate
 
 flex:
 	flex -l $(LANG).l
