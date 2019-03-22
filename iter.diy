@@ -3,7 +3,7 @@ public real factorial (integer n) {
     integer i := 1
 
     do {
-        fact := fact * i;
+        fact := fact*i
         i++;
     } while (i <= n);
 
