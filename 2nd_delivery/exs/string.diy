@@ -1,0 +1,34 @@
+public integer strcmp(string a, string b) {
+  integer i
+  i := 0
+  if a[i] <> 0 & b[i] <> 0 & a[i] = b[i] then
+    do
+      ++i
+    while a[i] <> 0 & b[i] <> 0 & a[i] = b[i];
+  strcmp := b[i] - a[i];
+};
+
+public string strcpy(string a, string b) {
+  integer i
+  i := 0
+  strcpy := a
+  if b <> 0 & *b <> 0 then
+    do {
+      a[i] := b[i];
+      i++;
+    } while b[i] <> 0
+  a[i] := 0
+};
+
+public string strchr(string a, integer b) {
+  integer i
+  i := 0
+  strchr := 0
+  if *a <> 0 then
+    do
+      if a[i] = b then {
+        strchr := &a[i];
+        break;
+      } else ++i
+    while a[i] <> 0
+};

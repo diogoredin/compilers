@@ -1,0 +1,19 @@
+public void prints(string s)
+public void printi(integer i)
+public void printd(number d)
+public void println()
+public integer atoi(string s)
+
+== Modulo principal de calculo de factoriais
+
+public number factorial(integer n)
+integer n := 5
+
+public integer entry (integer argc, string *argv, string *envp) {
+  if argc > 1 then
+    n := atoi(argv[1])
+
+  printi(n); prints("! = "); printd(factorial(n)); println()
+
+  entry := 0
+};
