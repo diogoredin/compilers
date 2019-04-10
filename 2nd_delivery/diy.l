@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include "node.h"
 #include "y.tab.h"
 static int eoi; /* end of instruction */
 static int ncom; /* comment nesting level */

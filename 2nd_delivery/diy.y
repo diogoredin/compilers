@@ -2,15 +2,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "node.h"
+#include "tabid.h"
+
 extern int yylex();
 int yyerror(char *s);
 extern FILE *yyin;
+
+static char buf[80]; /* error messages */
+static int gt, pos, dim(Node*);
+static void *gtr, *root, *swr, gotos();
+static Node *name(Node*), *swf(Node*), *swg(int pop);
 %}
 
 %union {
 	int i;			/* integer value */
 	double r;		/* real value */
 	char *s;		/* symbol name or string literal */
+	Node *n;		/* tree node */
 };
 
 %token <i> INT
@@ -22,7 +31,11 @@ extern FILE *yyin;
 %token ATR NE GE LE ELSE
 
 %%
-start:;
+
+file : decl
+	| file decl
+	;
+
 %%
 
 int yyerror(char *s) { printf("%s\n",s); return 1; }
