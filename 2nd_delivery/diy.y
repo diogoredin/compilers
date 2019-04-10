@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "node.h"
 #include "tabid.h"
 
@@ -9,10 +10,11 @@ extern int yylex();
 int yyerror(char *s);
 extern FILE *yyin;
 
-static char buf[80]; /* error messages */
+static char buf[80];
 static int gt, pos, dim(Node*);
 static void *gtr, *root, *swr, gotos();
 static Node *name(Node*), *swf(Node*), *swg(int pop);
+
 %}
 
 %union {
@@ -33,7 +35,36 @@ static Node *name(Node*), *swf(Node*), *swg(int pop);
 %%
 
 file : decl
-	| file decl
+
+decl : type ID init
+	| type ID
+	| type '*' ID init
+	| type '*' ID
+	| PUBLIC type '*' ID init
+	| PUBLIC type '*' ID
+	| PUBLIC type ID init
+	| PUBLIC type ID
+	| PUBLIC CONST type ID init
+	| PUBLIC CONST type ID
+	| PUBLIC CONST type '*' ID init
+	| PUBLIC CONST type '*' ID
+	| CONST type ID init
+	| CONST type ID
+	| CONST type '*' ID init
+	| CONST type '*' ID
+	;
+
+type : INTEGER
+	| STRING
+	| NUMBER
+	| VOID
+	;
+
+init : INT
+	| STR
+	| CONST STR
+	| REAL
+	| ID
 	;
 
 %%
