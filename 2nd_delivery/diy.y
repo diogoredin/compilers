@@ -32,8 +32,11 @@ static Node *name(Node*), *swf(Node*), *swg(int pop);
 %token VOID INTEGER STRING NUMBER CONST PUBLIC INCR DECR
 %token ATR NE GE LE ELSE
 
-%%
+%nonassoc '(' ')' '[' ']' '!' '++' '--' '~'
+%right '*' '/' '%' '+' '-' '<' '>' '=' '|' '&' GE LE NE
+%left ATR
 
+%%
 file : decl
 
 decl : type ID init
@@ -61,12 +64,49 @@ type : INTEGER
 	;
 
 init : INT
-	| STR
 	| CONST STR
+	| STR
 	| REAL
 	| ID
+	| "(" params ")" body
+	| "(" params ")"
 	;
 
+params : param
+	| "," params
+	;
+
+param : type "*" ID
+	| type ID
+	;
+
+body : "{" nparam  instruction "}"
+	;
+
+nparam : param ";" nparam
+	| param ";"
+	;
+
+instruction : IF rvalue %prec THEN instruction
+	| IF rvalue THEN instruction ELSE instruction
+	| DO instruction WHILE rvalue ";"
+	| FOR lvalue IN rvalue DOWNTO rvalue STEP rvalue DO rvalue
+	| FOR lvalue IN rvalue UPTO rvalue STEP rvalue DO rvalue
+	| FOR lvalue IN rvalue DOWNTO rvalue DO rvalue
+	| FOR lvalue IN rvalue UPTO rvalue DO rvalue
+	| rvalue ";"
+	| body
+	| BREAK INT ";"
+	| BREAK ";"
+	| CONTINUE INT ";"
+	| lvalue "#" rvalue ";"
+	;
+
+lvalue : ID
+	;
+
+rvalue : lvalue
+	;
 %%
 
 int yyerror(char *s) { printf("%s\n",s); return 1; }
