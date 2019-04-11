@@ -80,16 +80,16 @@ param : type "*" ID
 	| type ID
 	;
 
-body : "{" nparam  instruction "}"
+body : "{" nparam  inst "}"
 	;
 
 nparam : param ";" nparam
 	| param ";"
 	;
 
-instruction : IF rvalue %prec THEN instruction
-	| IF rvalue THEN instruction ELSE instruction
-	| DO instruction WHILE rvalue ";"
+inst : IF rvalue %prec THEN inst
+	| IF rvalue THEN inst ELSE inst
+	| DO inst WHILE rvalue ";"
 	| FOR lvalue IN rvalue DOWNTO rvalue STEP rvalue DO rvalue
 	| FOR lvalue IN rvalue UPTO rvalue STEP rvalue DO rvalue
 	| FOR lvalue IN rvalue DOWNTO rvalue DO rvalue
@@ -102,7 +102,14 @@ instruction : IF rvalue %prec THEN instruction
 	| lvalue "#" rvalue ";"
 	;
 
-lvalue : ID
+lvalue : rvalue "(" params ")"
+	| rvalue "[" INT "]"
+	| "(" lvalue ")"
+	| STR
+	| INT
+	| REAL
+	| ID
+	| CONST
 	;
 
 rvalue : lvalue
