@@ -87,32 +87,34 @@ nparam : param ";" nparam
 	| param ";"
 	;
 
-inst : IF rvalue %prec THEN inst
-	| IF rvalue THEN inst ELSE inst
-	| DO inst WHILE rvalue ";"
-	| FOR lvalue IN rvalue DOWNTO rvalue STEP rvalue DO rvalue
-	| FOR lvalue IN rvalue UPTO rvalue STEP rvalue DO rvalue
-	| FOR lvalue IN rvalue DOWNTO rvalue DO rvalue
-	| FOR lvalue IN rvalue UPTO rvalue DO rvalue
-	| rvalue ";"
+inst : IF expr %prec THEN inst
+	| IF expr THEN inst ELSE inst
+	| DO inst WHILE expr ";"
+	| FOR lvalue IN expr DOWNTO expr STEP expr DO inst
+	| FOR lvalue IN expr UPTO expr STEP expr DO inst
+	| FOR lvalue IN expr DOWNTO expr DO inst
+	| FOR lvalue IN expr UPTO expr DO inst
+	| expr ";"
 	| body
 	| BREAK INT ";"
 	| BREAK ";"
 	| CONTINUE INT ";"
-	| lvalue "#" rvalue ";"
+	| lvalue "#" expr ";"
 	;
 
-lvalue : rvalue "(" params ")"
-	| rvalue "[" INT "]"
-	| "(" lvalue ")"
-	| STR
-	| INT
-	| REAL
+expr : literal
+	| ID "[" INT "]"
+	| ID "(" params ")"
+	| ID "*"
+	| "(" expr ")"
+	;
+
+lvalue : ID "[" INT "]"
 	| ID
-	| CONST
 	;
 
-rvalue : lvalue
+literal : INT
+	| REAL
 	;
 %%
 
