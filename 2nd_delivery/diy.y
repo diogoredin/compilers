@@ -33,7 +33,7 @@ static Node *name(Node*), *swf(Node*), *swg(int pop);
 %token ATR NE GE LE ELSE
 
 %nonassoc '(' ')' '[' ']' '!' '++' '--' '~'
-%right '*' '/' '%' '+' '-' '<' '>' '=' '|' '&' GE LE NE
+%right '*' '-' '/' '%' '+' '<' '>' '=' '|' '&' GE LE NE
 %left ATR
 
 %%
@@ -103,9 +103,29 @@ inst : IF expr %prec THEN inst
 	;
 
 expr : literal
-	| ID "[" INT "]"
 	| ID "(" params ")"
-	| ID "*"
+	| "*" ID
+	| "-" expr
+	| "!" expr
+	| "~" expr
+	| lvalue INCR
+	| lvalue DECR
+	| INCR lvalue
+	| DECR lvalue
+	| expr GE expr
+	| expr LE expr
+	| expr NE expr
+	| lvalue ATR expr
+	| expr "*" expr
+    | expr "/" expr
+    | expr "%" expr
+	| expr "+" expr
+    | expr "-" expr
+	| expr "<" expr
+	| expr ">" expr
+	| expr "=" expr
+	| expr "&" expr
+	| expr "|" expr
 	| "(" expr ")"
 	;
 
@@ -116,6 +136,7 @@ lvalue : ID "[" INT "]"
 literal : INT
 	| REAL
 	;
+
 %%
 
 int yyerror(char *s) { printf("%s\n",s); return 1; }
