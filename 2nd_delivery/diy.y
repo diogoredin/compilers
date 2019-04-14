@@ -1,4 +1,6 @@
 %{
+#define YYDEBUG 1
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -37,24 +39,28 @@ static Node *name(Node*), *swf(Node*), *swg(int pop);
 %left ATR
 
 %%
-file : decl
+file : decls;
 
-decl : type ID init
-	| type ID
-	| type '*' ID init
-	| type '*' ID
-	| PUBLIC type '*' ID init
-	| PUBLIC type '*' ID
-	| PUBLIC type ID init
-	| PUBLIC type ID
-	| PUBLIC CONST type ID init
-	| PUBLIC CONST type ID
-	| PUBLIC CONST type '*' ID init
-	| PUBLIC CONST type '*' ID
-	| CONST type ID init
-	| CONST type ID
-	| CONST type '*' ID init
-	| CONST type '*' ID
+decls : decl
+	| decls decl
+	;
+
+decl : type ID init ";"
+	| type ID ";"
+	| type '*' ID init ";"
+	| type '*' ID ";"
+	| PUBLIC type '*' ID init ";"
+	| PUBLIC type '*' ID ";"
+	| PUBLIC type ID init ";"
+	| PUBLIC type ID ";"
+	| PUBLIC CONST type ID init ";"
+	| PUBLIC CONST type ID ";"
+	| PUBLIC CONST type '*' ID init ";"
+	| PUBLIC CONST type '*' ID ";"
+	| CONST type ID init ";"
+	| CONST type ID ";"
+	| CONST type '*' ID init ";"
+	| CONST type '*' ID ";"
 	;
 
 type : INTEGER
@@ -63,24 +69,33 @@ type : INTEGER
 	| VOID
 	;
 
-init : INT
-	| CONST STR
-	| STR
-	| REAL
-	| ID
+init : ATR INT
+	| ATR CONST STR
+	| ATR STR
+	| ATR REAL
+	| ATR ID
 	| "(" params ")" body
 	| "(" params ")"
 	;
 
-params : param
-	| "," params
+params : param "," params
+	| param
+	|
 	;
 
 param : type "*" ID
 	| type ID
 	;
 
-body : "{" nparam  inst "}"
+body : "{" nparam  insts "}"
+	| "{" nparam "}"
+	| "{" insts "}"
+	| "{" "}"
+	;
+
+insts : inst ";" insts
+	| inst ";"
+	| inst
 	;
 
 nparam : param ";" nparam
@@ -94,8 +109,7 @@ inst : IF expr %prec THEN inst
 	| FOR lvalue IN expr UPTO expr STEP expr DO inst
 	| FOR lvalue IN expr DOWNTO expr DO inst
 	| FOR lvalue IN expr UPTO expr DO inst
-	| expr ";"
-	| body
+	| expr
 	| BREAK INT ";"
 	| BREAK ";"
 	| CONTINUE INT ";"
@@ -103,6 +117,7 @@ inst : IF expr %prec THEN inst
 	;
 
 expr : literal
+	| ID "(" literal ")"
 	| ID "(" params ")"
 	| "*" ID
 	| "-" expr
@@ -135,22 +150,39 @@ lvalue : ID "[" INT "]"
 
 literal : INT
 	| REAL
+	| STR
 	;
 
 %%
+extern int yylineno;
+int yyerror (char *s) {
+	fprintf (stderr, "ERROR: %s at line %d\n", s, yylineno);
+	return 0;
+}
 
-int yyerror(char *s) { printf("%s\n",s); return 1; }
 char *dupstr(const char*s) { return strdup(s); }
 
 int main(int argc, char *argv[]) {
 	char ch, c;
+	extern YYSTYPE yylval;
+	int tk;
 
 	yyin = fopen(argv[1], "r");
 
 	if ( yyin==NULL ) {
 		fclose(yyin);
+
 	} else {
 		yyparse();
+
+		while (tk = yylex()) {
+			if (tk > YYERRCODE)
+				printf("%d:\t%s\n", tk, yyname[tk]);
+			else
+				printf("%d:\t%c\n", tk, tk);
+		}
+
+		return 0;
 	}
 
 }
