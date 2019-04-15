@@ -36,35 +36,32 @@ extern FILE *yyin;
 %left '+' '-'
 %left '*' '/' '%'
 %nonassoc INCR DECR '!'
-%nonassoc '(' ')' '[' ']'
 %nonassoc ID
+%nonassoc '(' ')' '[' ']'
 
 %% 
-file :
-	| decls
-	;
+file : decls;
 
 decls : decl
 	| decls decl
-	| decls ';'
 	;
 
-decl : type ID init
-	| type ID
-	| type '*' ID init
-	| type '*' ID
-	| PUBLIC type '*' ID init
-	| PUBLIC type '*' ID
-	| PUBLIC type ID init
-	| PUBLIC type ID
-	| PUBLIC CONST type ID init
-	| PUBLIC CONST type ID
-	| PUBLIC CONST type '*' ID init
-	| PUBLIC CONST type '*' ID
-	| CONST type ID init
-	| CONST type ID
-	| CONST type '*' ID init
-	| CONST type '*' ID
+decl : type ID init ';'
+	| type ID ';'
+	| type '*' ID init ';'
+	| type '*' ID ';'
+	| PUBLIC type '*' ID init ';'
+	| PUBLIC type '*' ID ';'
+	| PUBLIC type ID init ';'
+	| PUBLIC type ID ';'
+	| PUBLIC CONST type ID init ';'
+	| PUBLIC CONST type ID ';'
+	| PUBLIC CONST type '*' ID init ';'
+	| PUBLIC CONST type '*' ID ';'
+	| CONST type ID init ';'
+	| CONST type ID ';'
+	| CONST type '*' ID init ';'
+	| CONST type '*' ID ';'
 	;
 
 type : INTEGER
@@ -84,10 +81,15 @@ init : ATR INT
 
 params : param ',' params
 	| param
+	|
 	;
 
 param : type '*' ID
 	| type ID
+	;
+
+nparam : param ';' nparam
+	| param ';'
 	;
 
 body : '{' nparam  insts '}'
@@ -96,27 +98,24 @@ body : '{' nparam  insts '}'
 	| '{' '}'
 	;
 
-insts : inst
-	| insts inst
-	;
-
-nparam : param ';' nparam
-	| param ';'
+insts : inst ';' insts
+	| inst ';'
+	| inst
 	;
 
 inst : IF expr %prec THEN inst
 	| IF expr THEN inst ELSE inst
 	| DO inst WHILE expr ';'
-	| FOR ID IN expr DOWNTO expr STEP expr DO inst
-	| FOR ID IN expr UPTO expr STEP expr DO inst
-	| FOR ID IN expr DOWNTO expr DO inst
-	| FOR ID IN expr UPTO expr DO inst
+	| FOR lvalue IN expr DOWNTO expr STEP expr DO inst
+	| FOR lvalue IN expr UPTO expr STEP expr DO inst
+	| FOR lvalue IN expr DOWNTO expr DO inst
+	| FOR lvalue IN expr UPTO expr DO inst
+	| expr
+	| body
 	| BREAK INT ';'
 	| BREAK ';'
 	| CONTINUE INT ';'
-	| expr ';'
-	| ID '#' expr ';'
-	| body
+	| lvalue '#' expr ';'
 	;
 
 expr : literal
@@ -127,8 +126,8 @@ expr : literal
 	| ID DECR
 	| INCR ID
 	| DECR ID
-	| ID ATR expr
-	| ID
+	| lvalue ATR expr
+	| lvalue
 	| expr GE expr
 	| expr LE expr
 	| expr NE expr
@@ -143,6 +142,10 @@ expr : literal
 	| expr '&' expr
 	| expr '|' expr
 	| '(' expr ')'
+	;
+
+lvalue : ID
+	| ID '[' ID ']'
 	;
 
 function : ID '(' literal ')'
