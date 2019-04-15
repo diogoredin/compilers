@@ -1,6 +1,4 @@
 %{
-#define YYDEBUG 1
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,11 +9,6 @@
 extern int yylex();
 int yyerror(char *s);
 extern FILE *yyin;
-
-static char buf[80];
-static int gt, pos, dim(Node*);
-static void *gtr, *root, *swr, gotos();
-static Node *name(Node*), *swf(Node*), *swg(int pop);
 
 %}
 
@@ -34,33 +27,44 @@ static Node *name(Node*), *swf(Node*), *swg(int pop);
 %token VOID INTEGER STRING NUMBER CONST PUBLIC INCR DECR
 %token ATR NE GE LE ELSE
 
-%nonassoc '(' ')' '[' ']' '!' '++' '--' '~'
-%right '*' '-' '/' '%' '+' '<' '>' '=' '|' '&' GE LE NE
-%left ATR
+%right ATR
+%left '|'
+%left '&'
+%nonassoc '~'
+%left '=' NE
+%left '<' '>' GE LE
+%left '+' '-'
+%left '*' '/' '%'
+%nonassoc '!' INCR DECR
+%nonassoc '(' ')' '[' ']'
+%nonassoc ID
 
-%%
-file : decls;
+%% 
+file :
+	| decls
+	;
 
 decls : decl
 	| decls decl
+	| decls ';'
 	;
 
-decl : type ID init ";"
-	| type ID ";"
-	| type '*' ID init ";"
-	| type '*' ID ";"
-	| PUBLIC type '*' ID init ";"
-	| PUBLIC type '*' ID ";"
-	| PUBLIC type ID init ";"
-	| PUBLIC type ID ";"
-	| PUBLIC CONST type ID init ";"
-	| PUBLIC CONST type ID ";"
-	| PUBLIC CONST type '*' ID init ";"
-	| PUBLIC CONST type '*' ID ";"
-	| CONST type ID init ";"
-	| CONST type ID ";"
-	| CONST type '*' ID init ";"
-	| CONST type '*' ID ";"
+decl : type ID init
+	| type ID
+	| type '*' ID init
+	| type '*' ID
+	| PUBLIC type '*' ID init
+	| PUBLIC type '*' ID
+	| PUBLIC type ID init
+	| PUBLIC type ID
+	| PUBLIC CONST type ID init
+	| PUBLIC CONST type ID
+	| PUBLIC CONST type '*' ID init
+	| PUBLIC CONST type '*' ID
+	| CONST type ID init
+	| CONST type ID
+	| CONST type '*' ID init
+	| CONST type '*' ID
 	;
 
 type : INTEGER
@@ -74,77 +78,78 @@ init : ATR INT
 	| ATR STR
 	| ATR REAL
 	| ATR ID
-	| "(" params ")" body
-	| "(" params ")"
+	| '(' params ')' body
+	| '(' params ')'
 	;
 
-params : param "," params
+params : param ',' params
 	| param
-	|
 	;
 
-param : type "*" ID
+param : type '*' ID
 	| type ID
 	;
 
-body : "{" nparam  insts "}"
-	| "{" nparam "}"
-	| "{" insts "}"
-	| "{" "}"
+body : '{' nparam  insts '}'
+	| '{' nparam '}'
+	| '{' insts '}'
+	| '{' '}'
 	;
 
-insts : inst ";" insts
-	| inst ";"
-	| inst
+insts : inst
+	| insts inst
 	;
 
-nparam : param ";" nparam
-	| param ";"
+nparam : param ';' nparam
+	| param ';'
 	;
 
 inst : IF expr %prec THEN inst
 	| IF expr THEN inst ELSE inst
-	| DO inst WHILE expr ";"
+	| DO inst WHILE expr ';'
 	| FOR lvalue IN expr DOWNTO expr STEP expr DO inst
 	| FOR lvalue IN expr UPTO expr STEP expr DO inst
 	| FOR lvalue IN expr DOWNTO expr DO inst
 	| FOR lvalue IN expr UPTO expr DO inst
-	| expr
-	| BREAK INT ";"
-	| BREAK ";"
-	| CONTINUE INT ";"
-	| lvalue "#" expr ";"
+	| BREAK INT ';'
+	| BREAK ';'
+	| CONTINUE INT ';'
+	| expr ';'
+	| lvalue '#' expr ';'
+	| body
 	;
 
 expr : literal
-	| ID "(" literal ")"
-	| ID "(" params ")"
-	| "*" ID
-	| "-" expr
-	| "!" expr
-	| "~" expr
+	| function
+	| '!' expr
+	| '~' expr
 	| lvalue INCR
 	| lvalue DECR
 	| INCR lvalue
 	| DECR lvalue
+	| lvalue ATR expr
+	| lvalue
 	| expr GE expr
 	| expr LE expr
 	| expr NE expr
-	| lvalue ATR expr
-	| expr "*" expr
-    | expr "/" expr
-    | expr "%" expr
-	| expr "+" expr
-    | expr "-" expr
-	| expr "<" expr
-	| expr ">" expr
-	| expr "=" expr
-	| expr "&" expr
-	| expr "|" expr
-	| "(" expr ")"
+	| expr '*' expr
+    | expr '/' expr
+    | expr '%' expr
+	| expr '+' expr
+    | expr '-' expr
+	| expr '<' expr
+	| expr '>' expr
+	| expr '=' expr
+	| expr '&' expr
+	| expr '|' expr
+	| '(' expr ')'
 	;
 
-lvalue : ID "[" INT "]"
+function : ID '(' literal ')'
+	| ID '(' params ')'
+	;
+
+lvalue : ID '[' INT ']'
 	| ID
 	;
 
