@@ -24,8 +24,8 @@ extern FILE *yyin;
 %token <s> ID STR
 
 %token DO WHILE IF THEN FOR IN UPTO DOWNTO STEP BREAK CONTINUE
-%token VOID INTEGER STRING NUMBER CONST PUBLIC INCR DECR
-%token ATR NE GE LE ELSE
+%token VOID INTEGER STRING NUMBER CONST PUBLIC
+%token ELSE
 
 %right ATR
 %left '|'
@@ -35,7 +35,7 @@ extern FILE *yyin;
 %left '<' '>' GE LE
 %left '+' '-'
 %left '*' '/' '%'
-%nonassoc '!' INCR DECR
+%nonassoc INCR DECR '!'
 %nonassoc '(' ')' '[' ']'
 %nonassoc ID
 
@@ -107,15 +107,15 @@ nparam : param ';' nparam
 inst : IF expr %prec THEN inst
 	| IF expr THEN inst ELSE inst
 	| DO inst WHILE expr ';'
-	| FOR lvalue IN expr DOWNTO expr STEP expr DO inst
-	| FOR lvalue IN expr UPTO expr STEP expr DO inst
-	| FOR lvalue IN expr DOWNTO expr DO inst
-	| FOR lvalue IN expr UPTO expr DO inst
+	| FOR ID IN expr DOWNTO expr STEP expr DO inst
+	| FOR ID IN expr UPTO expr STEP expr DO inst
+	| FOR ID IN expr DOWNTO expr DO inst
+	| FOR ID IN expr UPTO expr DO inst
 	| BREAK INT ';'
 	| BREAK ';'
 	| CONTINUE INT ';'
 	| expr ';'
-	| lvalue '#' expr ';'
+	| ID '#' expr ';'
 	| body
 	;
 
@@ -123,12 +123,12 @@ expr : literal
 	| function
 	| '!' expr
 	| '~' expr
-	| lvalue INCR
-	| lvalue DECR
-	| INCR lvalue
-	| DECR lvalue
-	| lvalue ATR expr
-	| lvalue
+	| ID INCR
+	| ID DECR
+	| INCR ID
+	| DECR ID
+	| ID ATR expr
+	| ID
 	| expr GE expr
 	| expr LE expr
 	| expr NE expr
@@ -147,10 +147,6 @@ expr : literal
 
 function : ID '(' literal ')'
 	| ID '(' params ')'
-	;
-
-lvalue : ID '[' INT ']'
-	| ID
 	;
 
 literal : INT
