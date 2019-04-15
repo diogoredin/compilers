@@ -39,7 +39,7 @@ extern FILE *yyin;
 %nonassoc ID
 %nonassoc '(' ')' '[' ']'
 
-%% 
+%%
 file : decls;
 
 decls : decl
@@ -98,19 +98,18 @@ body : '{' nparam  insts '}'
 	| '{' '}'
 	;
 
-insts : inst ';' insts
-	| inst ';'
+insts : insts inst
 	| inst
 	;
 
-inst : IF expr %prec THEN inst
-	| IF expr THEN inst ELSE inst
+inst : IF expr THEN inst
+	| IF expr %prec THEN inst ELSE inst
 	| DO inst WHILE expr ';'
 	| FOR lvalue IN expr DOWNTO expr STEP expr DO inst
 	| FOR lvalue IN expr UPTO expr STEP expr DO inst
 	| FOR lvalue IN expr DOWNTO expr DO inst
 	| FOR lvalue IN expr UPTO expr DO inst
-	| expr
+	| expr ';'
 	| body
 	| BREAK INT ';'
 	| BREAK ';'
@@ -188,5 +187,4 @@ int main(int argc, char *argv[]) {
 
 		return 0;
 	}
-
 }
