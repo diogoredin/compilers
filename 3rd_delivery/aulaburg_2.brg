@@ -1,0 +1,20 @@
+%{
+    #include "node.h"
+    #include <stdio.h>
+    #include "postfix.h"
+%}
+%include "y.tab.h"
+%term ASSIGN='=' STRS=','
+%%
+
+file: PROG(decls, insts)                        1 { fprintf(yyout, pfIMM pfPOP pfRET pfEXTRN, ".prints", ".println"); }
+decls: NIL                                      0 {}
+decls: DECLS(decls, decl)                       0 {}
+decl: ASSIGN(ID, STR)                           1 {}
+insts: NIL                                      0 {}
+insts: INSTS(insts, inst)                       0 {}
+inst: PRINT(STRS)                               1 {}
+strs: str                                       0 {}
+strs: STRS(strs, str)                           0 {}
+str: ID                                         1 {}
+str: STR                                        1 {}   

@@ -1,18 +1,24 @@
-all: lex yacc burg assemble
+all: yacc lex burg compile # execute assemble
 
 lex:
 	flex -l diy.l
 
 yacc:
 	byacc -dv diy.y
-	gcc -g -c -I lib y.tab.c lex.yy.c
 
 burg:
-	./pburg -T diy.brg diy.asm
+	./pburg -T diy.brg
 
-assemble:
-	nasm -felf32 diy.asm
-	ld -o diy -melf_i386 diy.o lib/libdiy.a
+compile:
+	gcc -g -c -I lib y.tab.c lex.yy.c yyselect.c 
+	gcc -o diy y.tab.o lex.yy.o yyselect.o -L lib -lutil -lfl
+
+# execute:
+# 	./diy file.diy
+
+# assemble:
+#	nasm -felf file.diy
+# 	ld -o diy -melf_i386 diy.o lib/libdiy.a
 
 clean:
 	rm -f y.output y.tab.c y.tab.h lex.yy.c yyselect.c

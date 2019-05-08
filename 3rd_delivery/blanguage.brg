@@ -64,7 +64,7 @@ arg:	expr		1 { p->place = 1; }
 expr:	CTE		1 { fprintf(outfp, pfIMM, p->value.i); }
 expr:	STRING		1 { lbl++; fprintf(outfp, pfRODATA pfALIGN pfLABEL, mklbl(lbl)); outstr(p->value.s); fprintf(outfp, pfTEXT pfADDR, mklbl(lbl)); }
 
-expr:	ADD(expr,expr)	1 { fprintf(outfp, pfADD); }
+expr:	ADD(expr,expr)  1 { fprintf(outfp, pfADD); }
 expr:	SUB(expr,expr)	1 { fprintf(outfp, pfSUB); }
 expr:	MUL(expr,expr)	1 { fprintf(outfp, pfMUL); }
 expr:	DIV(expr,expr)	1 { fprintf(outfp, pfDIV); }

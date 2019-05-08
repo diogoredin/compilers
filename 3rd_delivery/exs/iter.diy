@@ -1,0 +1,7 @@
+== Computacao de factoriais de forma iterativa
+public number factorial(integer n) {
+    if n > 0 then
+        do
+            factorial := factorial * n
+        while --n > 1
+};

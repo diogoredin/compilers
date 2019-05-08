@@ -19,11 +19,17 @@ extern char *mklbl(int n);
 
 %}
 
-%term LIST=';' ASSIGN='=' ADD='+' SUB='-' MUL='*' DIV='/' MOD='%' LT='<' GT='>'
+%term PROG=';' ASSIGN='=' ADD='+' SUB='-' MUL='*' DIV='/' MOD='%' LT='<' GT='>'
 
 %include "y.tab.h"
 
 %%
+file: PROG(decls)		1 { fprintf(outfp, pfIMM pfPOP pfRET pfEXTRN, ".prints", ".println"); }
+decls: stmt
+
+stmt:	expr			1 {}
+expr:	STRING			1 {}
+
 %%
 
 #include "y.tab.h"
