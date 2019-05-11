@@ -30,5 +30,5 @@ $(RUNTIME):
 code.c: gram.c
 scan.c: gram.c
 clean:
-	rm -f y.tab.h y.output snap *.asm *.o scan.c gram.c code.c
+	rm -f y.tab.h y.output diy *.asm *.o scan.c gram.c code.c
 	clear

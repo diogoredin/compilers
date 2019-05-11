@@ -7,9 +7,9 @@
 #include "node.h"
 #include "tabid.h"
 
-extern int yyselect(Node*);
 extern int yylex();
 void yyerror(char *s);
+extern int yyselect(Node*);
 void declare(int pub, int cnst, Node *type, char *name, Node *value);
 void enter(int pub, int typ, char *name);
 int checkargs(char *name, Node *args);
