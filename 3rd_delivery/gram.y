@@ -61,7 +61,7 @@ extern FILE *out;
 
 %token PROG LOCAL POSINC POSDEC PTR CALL START PARAM NIL
 %%
-file	:											{ Node* n = nilNode(PROG); if (trace) printNode(n, 0, (char**)yyname); yyselect(n); }
+file:			 									{ Node* n = uniNode(PROG, 0); if (trace) printNode(n, 0, (char**)yyname); yyselect(n); }
 	| file error ';'
 	| file public tipo ID ';'	{ IDnew($3->value.i, $4, 0); declare($2, 0, $3, $4, 0); }
 	| file public CONST tipo ID ';'	{ IDnew($4->value.i+5, $5, 0); declare($2, 1, $4, $5, 0); }
@@ -71,11 +71,11 @@ file	:											{ Node* n = nilNode(PROG); if (trace) printNode(n, 0, (char**)y
 	| file public VOID ID { enter($2, 4, $4); } finit { function($2, intNode(VOID, 4), $4, $6); }
 	;
 
-public	:               { $$ = 0; }
+public:           { $$ = 0; }
 	| PUBLIC        { $$ = 1; }
 	;
 
-ptr	:               { $$ = 0; }
+ptr:              { $$ = 0; }
 	| '*'           { $$ = 10; }
 	;
 

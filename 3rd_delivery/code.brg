@@ -15,7 +15,7 @@ static char *mklbl(int n);
 %term END=';' ASSIGN='=' ADD='+' SUB='-' MUL='*' DIV='/' MOD='%' LT='<' GT='>' FUNC='(' COM=','
 
 %%
-finit: PROG 1 { fprintf(yyout, pfIMM pfPOP pfRET, 0); }
+file: PROG 1 { fprintf(yyout, pfIMM pfPOP pfRET, 0); }
 %%
 
 extern char **yynames;
