@@ -1,50 +1,43 @@
 %{
-
 #include <stdio.h>
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "node.h"
 #include "tabid.h"
-#include "postfix.h"
 #include "y.tab.h"
+#include "postfix.h"
 
-static int sameVar(NODEPTR_TYPE p) {
-	return strcmp(LEFT_CHILD(p)->value.s, LEFT_CHILD(RIGHT_CHILD(p))->value.s) ? 0x7fff : 2;
-}
-
-extern FILE *outfp;
-
-int lbl;
-char *mklbl(int n) {
-  static char buf[20];
-  sprintf(buf, "_i%d", n);
-  return strcpy(malloc(strlen(buf)+1),buf);
-}
-
-static void outstr(char *s) {
-  while (*s) fprintf(outfp, pfCHAR, (unsigned char)*s++);
-  fprintf(outfp, pfCHAR, 0);
-}
-
+extern FILE *yyout;
+static int lbl;
+static char *mklbl(int n);
 %}
 
 %include "y.tab.h"
 
 %term END=';' ASSIGN='=' ADD='+' SUB='-' MUL='*' DIV='/' MOD='%' LT='<' GT='>' FUNC='(' COM=','
-%start finit
 
 %%
-finit: FUNC(param) 1 { fprintf(outfp, "%s", "test"); }
-param: PARAM(STRING, ID) 0 { fprintf(outfp, "%s", "test"); }
+finit: PROG 1 { fprintf(yyout, pfIMM pfPOP pfRET, 0); }
 %%
 
 extern char **yynames;
 
+static int sameVar(NODEPTR_TYPE p) {
+	return strcmp(LEFT_CHILD(p)->value.s, LEFT_CHILD(RIGHT_CHILD(p))->value.s) ? 0x7fff : 2;
+}
+
 static int data(int t, char *s, int a, int user) {
-	if (s) fprintf(outfp, pfLABEL pfINTEGER, s, 0);
+	if (s) fprintf(yyout, pfLABEL pfINTEGER, s, 0);
 	return 1;
+}
+
+static char *mklbl(int n) {
+	static char buf[20];
+	sprintf(buf, "_#i%d", n);
+	return strdup(buf);
+}
+
+static void outstr(char *s) {
+	while (*s) fprintf(yyout, pfCHAR, (unsigned char)*s++);
+	fprintf(yyout, pfCHAR, 0);
 }
 
 void evaluate(Node *p) {
@@ -53,11 +46,11 @@ void evaluate(Node *p) {
 	if (errors) return;
 	if (trace) printNode(p, stdout, yynames);
 
-	fprintf(outfp, pfTEXT pfALIGN pfGLOBL pfLABEL, "_main", pfFUNC, "_main");
+	fprintf(yyout, pfTEXT pfALIGN pfGLOBL pfLABEL, "_main", pfFUNC, "_main");
 	
 	yyselect(p);
-	fprintf(outfp, pfRET pfDATA);
+	fprintf(yyout, pfRET pfDATA);
 
 	IDevery(data,0);
-	fprintf(outfp, pfEXTRN pfEXTRN pfEXTRN pfEXTRN, "_prints", "_printi", "_println", "_readi");
+	fprintf(yyout, pfEXTRN pfEXTRN pfEXTRN pfEXTRN, "_prints", "_printi", "_println", "_readi");
 }

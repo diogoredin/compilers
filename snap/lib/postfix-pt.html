@@ -2,7 +2,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 
 <HTML>
-<HEAD><TITLE>Postfix code generation</TITLE>
+<HEAD><TITLE> COMPILADORES 2004/2005 </TITLE>
 <META NAME="description" CONTENT="postfix">
 <META NAME="keywords" CONTENT="postfix">
 <META NAME="resource-type" CONTENT="document">
@@ -16,12 +16,9 @@
   <tr align="left" valign="middle"><td>
   <IMG ALIGN=left SRC="istlogo.gif" ALT="IST"> </td>
 
-  <TD> <CENTER> <H1><I><U>Postfix</U></I> code generation</H1>
-  <H2>November 22, 2017</H2>
-  <H3>Departament of Computer Science and Engineering</H3>
-  <H3>Instituto Superior T&eacute;cnico</H3>
-  <H3>University of Lisbon</H3>
-	<BR> <BR>
+  <TD> <CENTER> <H1>Projecto de Compiladores: <I><U>postfix</U></I></H1>
+  <H2>22 de Julho de 2004</H2>
+  <H3> Departamento de Engenharia Inform&aacute;tica</H3> <BR> <BR>
 
 </CENTER> </TD> </TABLE> <HR size=2 noshade> <BR>
 
@@ -34,19 +31,24 @@
 <P>
 
 <H1><A NAME="SECTION1">
-1 - Introduction</A>
+1 - Generalidades</A>
 </H1>
 
 <P>
-This document describes the code generation for a stack machine using a
-predefined set of macros defined in <A HREF="postfix.h">postfix.h</A>).
+Este documento descreve o processo de gera&ccedil;&atilde;o de c&oacute;digo
+m&aacute;quina a partir de uma m&aacute;quina de pilha, usando um conjunto
+de macros definidas em <A HREF="postfix.h">postfix.h</A>).
 <P>
-The code generation assumes an stack machine architecture (SL0) with three
-registers:
+A gera&ccedil;&atilde;o de c&oacute;digo presup&otilde;e uma arquitectura
+baseada numa pilha com tr&ecirc;s registos (SL0):
 <UL>
-	<LI><B>IP (instruction pointer)</B>: pointer to the next instruction.
-	<LI><B>SP (stack pointer)</B>: pointer to the top of the stack.
-  <LI><B>FP (frame pointer)</B>: pointer to the activation record of the rotine being executed, within the stack.
+	<LI><B>IP (instruction pointer)</B>: indica a posi&ccedil;&atilde;o da
+		pr&oacute;xima instru&ccedil;&atilde;o a ser executada.
+	<LI><B>SP (stack pointer)</B>: indica a posi&ccedil;&atilde;o do
+		elemento situado no topo da pilha de dados.
+        <LI><B>FP (frame pointer)</B>: indica a posi&ccedil;&atilde;o do
+		in&iacute;cio do registo de activa&ccedil;&atilde;o da rotina em
+		execu&ccedil;&atilde;o.
 </UL>
 
 <H1><A NAME="SECTION1">
@@ -54,25 +56,21 @@ registers:
 </H1>
 
 <P>
-Each instruction of the stack machine architecture (SL0) is converted to
-a set of real processor instrutions. At the moment the <i>intel</i> <B>i386</B>
-processor, the <i>AMD</i> <b>x86_64</b> processor and the <i>ARM</i> <b>v7</b>
-processor are supported, as well as <i>debug</i> and <i>SSA</i>
-pseudo-architectures. Other architectures require the mapping of each
-<b>postifx</b> instruction into the given processor specific instructuions.
+Cada instru&ccedil;&atilde;o da m&aacute;quina de pilha (SL0) &eacute;
+convertida num conjunto de instru&ccedil;&otilde;es da m&aacute;quina de
+destino, neste caso <B>i386</B>.
 <P>
-Each instruction must be printed using a <B>printf</B>, or equivalent such as
-<B>fprintf</B> or <B>sprintf</B>, supplying the required arguments for each
-case.
-The same macros can be used in <b>java</b>, although the <tt>#define</tt> must
-be converted into <tt>static final</tt>, using a <B>String.format</b> rotine.
+Cada instru&ccedil;&atilde;o deve ser impressa utilizando a rotina
+<B>printf</B>, ou uma rotina equivalente como por exemplo <B>fprintf</B> ou
+<B>sprintf</B>, devendo ser fornecidos os argumentos adicionais do tipo
+correspondente, quando necess&aacute;rio.
 <P>
-For instance, the sum <B>pfADD</B> assumes two values on the top of the
-stack. The macro produces processor instructions that remove these values
-and pushes back the sum result.
-In order to execute the sum, no argument are needed and, only a 
-<TT>printf(pfADD);</TT> is required.
-<P> <!-- PRS -->
+Por exemplo, uma soma <B>pfADD</B> pressup&otilde;e as duas parcelas no
+topo da pilha, retirando-as da pilha, e deixando em seu lugar o resultado
+da opera&ccedil;&atilde;o. Assim, n&atilde;o &eacute; necess&aacute;rio
+passar argumentos &agrave; opera&ccedil;&atilde;o de soma bastando fazer
+<TT>printf(pfADD);</TT>.
+<P>
 Para colocar um valor inteiro na pilha torna-se necess&aacute;rio indicar
 a opera&ccedil;&atilde;o e o valor, ficando <TT>printf(pfIMM, valor)</TT>.
 Notar que a macro <B>pfIMM</B> cont&eacute;m um <B>%d</B> pelo que qualquer

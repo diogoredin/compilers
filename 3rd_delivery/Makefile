@@ -1,43 +1,34 @@
-DEST=..
-EXE=diy
-EXT=.diy
-.SUFFIXES: $(EXT) .brg .asm
+.SUFFIXES: .brg .asm
+
+COMPILER=diy
+RUNTIME=runtime/librun.a
+UTIL=lib/libutil.a
+
 CC=gcc
-CFLAGS=-g -DYYDEBUG -I"$(INC)" $(ARCH)
+CFLAGS=-g -Ilib -DYYDEBUG -DpfAMD64
 LEX=flex
-LFLAGS=-l # -ld for debug
+LFLAGS=-l
 YACC=byacc
 YFLAGS=-dv
 BURG=./pburg
 BFLAGS=-T
-LDLIBS=$(LIB)
+LDLIBS=-L lib -lutil
 
-INC=lib
-LIB=$(INC)/libutil.a
-OBJ=scan.o gram.o code.o
-
-all: $(EXE)
-	cp $^ $(DEST)
-
-$(EXE): $(OBJ)
-	$(MAKE) $(MFLAGS) -C $(INC)
-	$(LINK.c) $^ $(LDLIBS) -o $@
-
-btr: scan.o gram.o
-	$(MAKE) $(MFLAGS) -C $(INC)
-	$(LINK.c) $^ $(LDLIBS) -o $@
-
+all: $(COMPILER) $(RUNTIME)
+$(COMPILER): scan.o gram.o code.o $(UTIL)
+	$(LINK.c) -o $@ $^
+$(UTIL):
+	make -C lib
+$(RUNTIME):
+	make -C runtime install
 .brg.c:
 	$(BURG) $(BFLAGS) $< $@
-
-scan.o: gram.o
-code.o: gram.o
-
 %: %.diy
-	./diy $< out.asm
-	nasm -felf32 out.asm
-	ld -melf_i386 out.o run/librun.a
-
+	./diy $<
+	nasm -felf64 $*.asm
+	gcc $*.o -o $@ runtime/librun.a
+code.c: gram.c
+scan.c: gram.c
 clean:
-	rm -f $(EXE) $(OBJ) a.out yyselect.c lex.yy.c *~ y.* *.o *.asm
+	rm -f y.tab.h y.output snap *.asm *.o scan.c gram.c code.c
 	clear

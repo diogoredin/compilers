@@ -7,6 +7,7 @@
 #include "node.h"
 #include "tabid.h"
 
+extern int yyselect(Node*);
 extern int yylex();
 void yyerror(char *s);
 void declare(int pub, int cnst, Node *type, char *name, Node *value);
@@ -15,8 +16,17 @@ int checkargs(char *name, Node *args);
 int nostring(Node *arg1, Node *arg2);
 int intonly(Node *arg, int);
 int noassign(Node *arg1, Node *arg2);
+
 static int ncicl;
 static char *fpar;
+extern int yylineno, trace;
+
+extern FILE *yyin;
+extern FILE *out;
+
+#ifndef YYDEBUG
+#define yyname 0
+#endif
 %}
 
 %union {
@@ -49,9 +59,9 @@ static char *fpar;
 %type <n> bloco decls param base stmt step args list end brk lv expr
 %type <i> ptr intp public
 
-%token LOCAL POSINC POSDEC PTR CALL START PARAM NIL
+%token PROG LOCAL POSINC POSDEC PTR CALL START PARAM NIL
 %%
-file	:
+file	:											{ Node* n = nilNode(PROG); if (trace) printNode(n, 0, (char**)yyname); yyselect(n); }
 	| file error ';'
 	| file public tipo ID ';'	{ IDnew($3->value.i, $4, 0); declare($2, 0, $3, $4, 0); }
 	| file public CONST tipo ID ';'	{ IDnew($4->value.i+5, $5, 0); declare($2, 1, $4, $5, 0); }
@@ -83,7 +93,7 @@ init	: ATR ID ';'		{ $$ = strNode(ID, $2); $$->info = IDfind($2, 0) + 10; }
 	| ATR '-' REAL ';'	{ $$ = realNode(REAL, -$3); $$->info = 3; }
         ;
 
-finit   : '(' params ')' blocop { $$ = binNode('(', $4, $2); Node *n = binNode('(', $4, $2); printNode(n, 0, (char**)yyname); }
+finit	: '(' params ')' blocop { $$ = binNode('(', $4, $2); }
 	| '(' ')' blocop        { $$ = binNode('(', $3, 0); }
 	;
 
@@ -200,6 +210,7 @@ expr	: lv		{ $$ = uniNode(PTR, $1); $$->info = $1->info; }
 	;
 
 %%
+
 char **yynames =
 #if YYDEBUG > 0
 		 (char**)yyname;
