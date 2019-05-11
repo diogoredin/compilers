@@ -1,31 +1,43 @@
-all: yacc lex burg compile # execute assemble
+DEST=..
+EXE=diy
+EXT=.diy
+.SUFFIXES: $(EXT) .brg .asm
+CC=gcc
+CFLAGS=-g -DYYDEBUG -I"$(INC)" $(ARCH)
+LEX=flex
+LFLAGS=-l # -ld for debug
+YACC=byacc
+YFLAGS=-dv
+BURG=./pburg
+BFLAGS=-T
+LDLIBS=$(LIB)
 
-lex:
-	flex -l diy.l
+INC=lib
+LIB=$(INC)/libutil.a
+OBJ=scan.o gram.o code.o
 
-yacc:
-	byacc -dv diy.y
+all: $(EXE)
+	cp $^ $(DEST)
 
-burg:
-	./pburg -T diy.brg
+$(EXE): $(OBJ)
+	$(MAKE) $(MFLAGS) -C $(INC)
+	$(LINK.c) $^ $(LDLIBS) -o $@
 
-compile:
-	gcc -g -c -I lib y.tab.c lex.yy.c yyselect.c 
-	gcc -o diy y.tab.o lex.yy.o yyselect.o -L lib -lutil -lfl
+btr: scan.o gram.o
+	$(MAKE) $(MFLAGS) -C $(INC)
+	$(LINK.c) $^ $(LDLIBS) -o $@
 
-# execute:
-# 	./diy file.diy
+.brg.c:
+	$(BURG) $(BFLAGS) $< $@
 
-# assemble:
-#	nasm -felf file.diy
-# 	ld -o diy -melf_i386 diy.o lib/libdiy.a
+scan.o: gram.o
+code.o: gram.o
+
+%: %.diy
+	./diy $< out.asm
+	nasm -felf32 out.asm
+	ld -melf_i386 out.o run/librun.a
 
 clean:
-	rm -f y.output y.tab.c y.tab.h lex.yy.c yyselect.c
-	rm -f *.o *.asm
-	rm -f .DS_Store
-	rm -f diy
+	rm -f $(EXE) $(OBJ) a.out yyselect.c lex.yy.c *~ y.* *.o *.asm
 	clear
-
-zip:
-	zip proj diy.l diy.y diy.brg Makefile

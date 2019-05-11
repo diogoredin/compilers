@@ -8,31 +8,37 @@
 #include "node.h"
 #include "tabid.h"
 #include "postfix.h"
+#include "y.tab.h"
 
 static int sameVar(NODEPTR_TYPE p) {
 	return strcmp(LEFT_CHILD(p)->value.s, LEFT_CHILD(RIGHT_CHILD(p))->value.s) ? 0x7fff : 2;
 }
 
 extern FILE *outfp;
-extern int lbl;
-extern char *mklbl(int n);
+
+int lbl;
+char *mklbl(int n) {
+  static char buf[20];
+  sprintf(buf, "_i%d", n);
+  return strcpy(malloc(strlen(buf)+1),buf);
+}
+
+static void outstr(char *s) {
+  while (*s) fprintf(outfp, pfCHAR, (unsigned char)*s++);
+  fprintf(outfp, pfCHAR, 0);
+}
 
 %}
 
-%term PROG=';' ASSIGN='=' ADD='+' SUB='-' MUL='*' DIV='/' MOD='%' LT='<' GT='>'
-
 %include "y.tab.h"
 
-%%
-file: PROG(decls)		1 { fprintf(outfp, pfIMM pfPOP pfRET pfEXTRN, ".prints", ".println"); }
-decls: stmt
-
-stmt:	expr			1 {}
-expr:	STRING			1 {}
+%term END=';' ASSIGN='=' ADD='+' SUB='-' MUL='*' DIV='/' MOD='%' LT='<' GT='>' FUNC='(' COM=','
+%start finit
 
 %%
-
-#include "y.tab.h"
+finit: FUNC(param) 1 { fprintf(outfp, "%s", "test"); }
+param: PARAM(STRING, ID) 0 { fprintf(outfp, "%s", "test"); }
+%%
 
 extern char **yynames;
 

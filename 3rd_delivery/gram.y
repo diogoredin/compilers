@@ -83,7 +83,7 @@ init	: ATR ID ';'		{ $$ = strNode(ID, $2); $$->info = IDfind($2, 0) + 10; }
 	| ATR '-' REAL ';'	{ $$ = realNode(REAL, -$3); $$->info = 3; }
         ;
 
-finit   : '(' params ')' blocop { $$ = binNode('(', $4, $2); }
+finit   : '(' params ')' blocop { $$ = binNode('(', $4, $2); Node *n = binNode('(', $4, $2); printNode(n, 0, (char**)yyname); }
 	| '(' ')' blocop        { $$ = binNode('(', $3, 0); }
 	;
 

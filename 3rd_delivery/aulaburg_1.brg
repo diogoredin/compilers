@@ -26,5 +26,5 @@ expr: ASSIGN(ID, ADD(CONST, ID))            otherVar /* 1 ou max cost */
 %%
 
 int sameVar(Node* n) {
-    return strcmp(LEFT_CHILD(p)->value.s, LEFT_CHILD(RIGHT_CHILD(p))->value.s == 0 ? 1 : MAX_COST; }
+    return strcmp(LEFT_CHILD(p)->value.s, LEFT_CHILD(RIGHT_CHILD(p))->value.s) == 0 ? 1 : MAX_COST; }
 }
