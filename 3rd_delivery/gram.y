@@ -55,23 +55,21 @@ extern FILE *out;
 %nonassoc UMINUS '!' NOT REF
 %nonassoc '[' '('
 
-%type <n> tipo init finit blocop params func
+%type <n> tipo init finit blocop params
 %type <n> bloco decls param base stmt step args list end brk lv expr
 %type <i> ptr intp public
 
 %token PROG LOCAL POSINC POSDEC PTR CALL START PARAM NIL
 
 %%
-file: func	{ Node* n = uniNode(PROG, $1); if (trace) printNode(n, 0, (char**)yyname); yyselect(n); };
-
-func: 
-	| func error ';'
-	| func public tipo ID ';'	{ IDnew($3->value.i, $4, 0); declare($2, 0, $3, $4, 0); }
-	| func public CONST tipo ID ';'	{ IDnew($4->value.i+5, $5, 0); declare($2, 1, $4, $5, 0); }
-	| func public tipo ID init	{ IDnew($3->value.i, $4, 0); declare($2, 0, $3, $4, $5); }
-	| func public CONST tipo ID init	{ IDnew($4->value.i+5, $5, 0); declare($2, 1, $4, $5, $6); }
-	| func public tipo ID { enter($2, $3->value.i, $4); } finit { function($2, $3, $4, $6); }
-	| func public VOID ID { enter($2, 4, $4); } finit { function($2, intNode(VOID, 4), $4, $6); }
+file: 
+	| file error ';'
+	| file public tipo ID ';'	{ IDnew($3->value.i, $4, 0); declare($2, 0, $3, $4, 0); }
+	| file public CONST tipo ID ';'	{ IDnew($4->value.i+5, $5, 0); declare($2, 1, $4, $5, 0); }
+	| file public tipo ID init	{ IDnew($3->value.i, $4, 0); declare($2, 0, $3, $4, $5); }
+	| file public CONST tipo ID init	{ IDnew($4->value.i+5, $5, 0); declare($2, 1, $4, $5, $6); }
+	| file public tipo ID { enter($2, $3->value.i, $4); } finit { yyselect($6); function($2, $3, $4, $6); }
+	| file public VOID ID { enter($2, 4, $4); } finit { function($2, intNode(VOID, 4), $4, $6); }
 	;
 
 public:           { $$ = 0; }

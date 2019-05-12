@@ -12,10 +12,24 @@ static char *mklbl(int n);
 
 %include "y.tab.h"
 
-%term END=';' ASSIGN='=' ADD='+' SUB='-' MUL='*' DIV='/' MOD='%' LT='<' GT='>' FUNC='(' COM=','
+%term END=';' ASSIGN='=' ADD='+' SUB='-' MUL='*' DIV='/' MOD='%' LT='<' GT='>' 
+%term FUNC='(' COM=',' BLCK='{'
+
+%start prog
 
 %%
-file: PROG 1 { fprintf(yyout, pfIMM pfPOP pfRET, 0); }
+prog: decl 1 {}
+decl: func 1 {}
+func: FUNC(blocop,params) 1 {}
+params: param 1 {}
+params: COM(params,param) 1 {}
+param: PARAM(tipo,ID) 1 {}
+tipo: INTEGER 1 {}
+tipo: STRING 1 {}
+tipo: NUMBER 1 {}
+blocop: bloco 1 {}
+bloco: BLCK 1 {}
+bloco: NIL 1 {}
 %%
 
 extern char **yynames;

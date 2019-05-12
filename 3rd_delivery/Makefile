@@ -11,7 +11,7 @@ LFLAGS=-l
 YACC=byacc
 YFLAGS=-dv
 BURG=./pburg
-BFLAGS=-T
+BFLAGS=-T -n
 LDLIBS=-L lib -lutil
 
 all: $(COMPILER) $(RUNTIME)
