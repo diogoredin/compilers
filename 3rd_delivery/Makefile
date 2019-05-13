@@ -5,7 +5,7 @@ RUNTIME=runtime/librun.a
 UTIL=lib/libutil.a
 
 CC=gcc
-CFLAGS=-g -Ilib -DYYDEBUG -DpfAMD64
+CFLAGS=-g -Ilib -DYYDEBUG
 LEX=flex
 LFLAGS=-l
 YACC=byacc

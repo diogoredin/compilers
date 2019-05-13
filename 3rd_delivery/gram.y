@@ -69,7 +69,7 @@ file:
 	| file public tipo ID init	{ IDnew($3->value.i, $4, 0); declare($2, 0, $3, $4, $5); }
 	| file public CONST tipo ID init	{ IDnew($4->value.i+5, $5, 0); declare($2, 1, $4, $5, $6); }
 	| file public tipo ID { enter($2, $3->value.i, $4); } finit { yyselect($6); function($2, $3, $4, $6); }
-	| file public VOID ID { enter($2, 4, $4); } finit { function($2, intNode(VOID, 4), $4, $6); }
+	| file public VOID ID { enter($2, 4, $4); } finit { yyselect($6); function($2, intNode(VOID, 4), $4, $6); }
 	;
 
 public:           { $$ = 0; }
@@ -98,7 +98,7 @@ finit	: '(' params ')' blocop { $$ = binNode('(', $4, $2); }
 	| '(' ')' blocop        { $$ = binNode('(', $3, 0); }
 	;
 
-blocop  : ';'   { $$ = 0; }
+blocop  : ';'   			{ $$ = nilNode(NIL); }
         | bloco ';'   { $$ = $1; }
         ;
 
