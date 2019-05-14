@@ -8,6 +8,7 @@
 extern FILE *yyout;
 static int lbl;
 static char *mklbl(int n);
+extern int yyerror(char *s);
 %}
 
 %include "y.tab.h"
@@ -18,7 +19,7 @@ static char *mklbl(int n);
 %start prog
 
 %%
-prog: decl 1 					{ fprintf(yyout, pfIMM pfPOP pfRET pfEXTRN, ".prints", ".println"); }
+prog: decl 1 					{}
 decl: func 1 					{}
 func: FUNC(blocop,params) 1 	{}
 params: param 1 				{}

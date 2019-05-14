@@ -1,21 +1,37 @@
-AR=ar crl
-LD=ld -r -o
-#LD=ld -melf_i386 -r -o
-CFLAGS=-g -Dunderscore # -fno-stack-protector # quando __stack_chk_fail em Ubunto
-CC=gcc # -m32
+DEST=../..
+LIB=run
+OS=$(ELF32)
+SYS=elf32
+CC=gcc -m32 # produce elf32 in 64 bit machines
+LD=ld -melf_i386 # produce elf32 in 64 bit machines
+CFLAGS=-g -Dunderscore -fno-stack-protector # when __stack_chk_fail in Ubunto
+BOOT=$(LIB).o # bootstrap runtime for a C compiler
+RUNTIME=lib$(LIB).a # stand-alone runtime
 
-LIB=librun.a
-OUT=run.o
-OBJ= boot.o lib.o dbl.o stub.o
+ELF32=linux.o lib.o sys.o wrap.o char.o
+ELF64=linux64.o lib64.o sys64.o
+WIN32=win.obj lib.obj
 
-all: $(LIB) $(OUT)
-install: $(LIB)
+NASM=nasm -f$(SYS)
 
-$(LIB): $(OBJ)
-	$(AR) $@ $(OBJ)
+all: $(RUNTIME) $(BOOT)
+	cp $^ $(DEST)
 
-$(OUT): $(OBJ)
-	$(LD) $@ $(OBJ)
+$(RUNTIME): dbl.o $(OS)
+	ar crl $@ $?
 
-clean:
-	$(RM) $(LIB) $(OUT) $(OBJ)
+$(BOOT): dbl.o $(OS)
+	$(LD) -r -o  $@ $^
+
+dbl.o: dbl.c
+	$(CC) $(CFLAGS) -DPOSTFIX -c $<
+
+.SUFFIXES: .asm .obj
+.asm.obj:
+	$(NASM) $<
+.asm.o:
+	$(NASM) $<
+install:: $(RUNTIME)
+	cp $(RUNTIME) ..
+clean::
+	rm -f $(RUNTIME) $(BOOT) *.o a.out core
