@@ -30,7 +30,7 @@ tipo: STRING 1 					{}
 tipo: NUMBER 1 					{}
 blocop: bloco 1 				{}
 bloco: BLCK 1 					{}
-bloco: NIL 1 					{}
+bloco: NIL 1 					{ fprintf(yyout, pfEXTRN, ".prints"); }
 %%
 
 extern char **yynames;
@@ -79,6 +79,7 @@ void evaluate(Node *p) {
 
 /* Function evaluation */
 void functionEvaluate(char *name, int enter, Node *body) {
+
   int i;
   int tipo = IDfind(name, 0);
 
@@ -86,11 +87,11 @@ void functionEvaluate(char *name, int enter, Node *body) {
       tipo -= 32;
 
   extern int trace;
-
   if(trace) printNode(body, stdout, yynames);
-  if (body == 0 || body->attrib == NIL) /* forward declaration */
-    fprintf(yyout, pfEXTRN, name);
-  else { /* function body */
+
+  if ( LEFT_CHILD(body)->value.s == 0 || LEFT_CHILD(body)->attrib == NIL) {
+	fprintf(yyout, pfEXTRN, name);
+  } else {
     if (strcmp(name, "entry") == 0) // para a funcao entry
       fprintf(yyout, pfTEXT pfALIGN pfGLOBL pfLABEL pfENTER, "_entry", pfFUNC, "_entry", enter);
     else

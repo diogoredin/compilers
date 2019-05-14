@@ -1,3 +1,5 @@
+; EXTRN
+extern	$prints
 ; TEXT
 segment	.text
 ; ALIGN
