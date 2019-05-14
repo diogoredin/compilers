@@ -1,0 +1,188 @@
+%{
+/* Instruction selection with postfix.h
+ */
+    
+#include <stdio.h>
+#include <assert.h>
+#include <stdlib.h>
+#include <string.h>
+#include "node.h"
+#include "tabid.h"
+#include "postfix.h"
+#include "y.tab.h"
+
+#ifndef U_
+#define U_ "_"
+#endif
+
+extern FILE *outfp;
+extern int lbl;
+extern char *mklbl(int n);
+extern char **yynames;
+
+static int stk;
+static int sameVar(NODEPTR_TYPE p) {
+  return strcmp(p->SUB(0)->value.s, p->SUB(1)->SUB(0)->value.s) ? 0x7fff : 2;
+}
+static int sameLoc(NODEPTR_TYPE p) {
+  return p->SUB(0)->value.s == p->SUB(1)->SUB(0)->value.s ? 0x7fff : 2;
+}
+
+%}
+%term ARG=';'
+%include "y.tab.h"
+%%
+
+%!ficheiro: PROG(declaracoes)
+%!
+%!declaracoes: declaracao
+%!declaracoes: DECLS(declaracoes, declaracao)
+%!
+%!declaracao: INIT(id, init)        
+%!declaracao: DECL(id)
+%!declaracao: DECL(id, BODY)
+%!declaracao: DECL(id, corpo)
+%!declaracao: DECL(id, NIL)
+%!
+%!id: IDENTIF { /* globl/X pfDATA/RODATA ALIGN LABEL */}
+%!
+%!corpop: NIL
+%!corpop: corpo
+%!
+%!ptr: NIL      
+%!ptr: PNTR       
+%!
+%!cons: NIL     
+%!cons: CONST   
+%!
+%!pub: NIL      
+%!pub: PUBLIC   
+%!
+%!tipo: VOID      
+%!tipo: INTEGER   
+%!tipo: STRING    
+%!tipo: NUMBER    
+%!
+%!init: INT { /* pfINTEGER */ }
+%!init: STR { /* char *s = p->value.s; do fprintf(outfp, pfCHAR, (unsigned char)*s); while (*s++ != 0); */ }
+%!init: NUM
+%!init: IDENTIF {/* pfID */ }
+%!
+%!parametros: PARAMS(parametros, parametro)
+%!parametros: PARAMS(parametro)
+%!
+%!parametro: IDENTIF
+%!
+%!pars2:
+%!pars2:
+
+corpo: NIL 
+corpo: PARS2
+corpo: INTRS(instrucoes)
+corpo: PINTR
+
+instrucoes: INSTRS(instrucoes, instrucao)
+
+instrucao:IFX(JZ(expressao, ETIQ))
+instrucao:
+instrucao:
+instrucao:
+instrucao:
+instrucao:
+instrucao:
+instrucao:
+instrucao:
+instrucao:
+instrucao:
+instrucao:
+
+updown: UPTO
+updown: DOWNTO
+
+expressoes: EXPS(expressoes, expressao)
+expressoes: 
+
+expressao: INT      1 { fprintf(outfp, pfIMM, p->value.i); }
+expressao: NUM      0{}
+expressao: STRN
+//expressao: lv
+//expressao: id(ex)
+//expressao: id()
+//expressao: TIRAAAAAAAR
+expressao: ATRIB(lvalue, expressao)       3 { fprintf(outfp, pfDUP pfADDR pfSTORE, p->SUB(0)->value.s); }
+//expressao:UMINUS
+//expressao: ++LV
+//expressao: --LV
+//expressao: LV++
+//expressao: LV--
+expressao: MUL(expressao, expressao)      1 { fprintf(outfp, pfMUL); } 
+expressao: DIV(expressao, expressao)      1 { fprintf(outfp, pfDIV); } 
+expressao: MOD(expressao, expressao)      1 { fprintf(outfp, pfMOD); } 
+expressao: ADD(expressao, expressao)      1 { fprintf(outfp, pfADD); }
+expressao: SUBT(expressao, expressao)     1 { fprintf(outfp, pfSUB); }
+expressao: GT(expressao, expressao)       1 { fprintf(outfp, pfGT); } 
+expressao: LT(expressao, expressao)       1 { fprintf(outfp, pfLT); } 
+expressao: EQ(expressao, expressao)       1 { fprintf(outfp, pfEQ; } 
+expressao: NE(expressao, expressao)       1 { fprintf(outfp, pfNE); } 
+expressao: GE(expressao, expressao)       1 { fprintf(outfp, pfGE); } 
+expressao: LE(expressao, expressao)       1 { fprintf(outfp, pfLE); } 
+expressao: AND(expressao, expressao)
+expressao: OR(expressao, expressao)
+expressao: NEG(expressao)
+expressao: FACT(expressao)
+expressao: ADDR(lvalue)
+expressao: POINTER(lvalue)
+
+lvalue: IDENTIF
+//lvalue: cenas
+
+stack:  ARG(stack,stack)
+stack:  expressao { stk++; }
+stack:  NIL
+
+%%
+
+void function(char *name, int enter, Node *body) {
+  int i;
+  extern int trace;
+
+  if(trace) printNode(body, stdout, yynames);
+  if (body == 0) /* forward declaration */
+    fprintf(outfp, pfEXTRN, name);
+  else { /* function body */
+    fprintf(outfp, pfTEXT pfALIGN pfGLOBL pfLABEL pfENTER, name, pfFUNC, name, enter);
+    if (yyselect(body) == 1) yyerror("No match for syntactic tree.");
+    fprintf(outfp, pfLEAVE pfRET); /* just in case there is no 'return' */
+    freeNode(body);
+  }
+}
+
+void program(int enter, Node *body) {
+  function("_entry", enter, body);
+  fprintf(outfp, pfEXTRN pfEXTRN pfEXTRN pfEXTRN,
+  		U_"prints", U_"printi", U_"println", U_"readi");
+}
+
+void declare(char *name, int value) {
+  //IDnew(INTEGER, name, 0);
+  if (value == 0)
+    fprintf(outfp, pfBSS pfALIGN pfLABEL pfBYTE pfTEXT, name, 4);
+  else if ((value & 0x3) == 1){ //Se for inteiro
+      if ((value & 0x15) == 9){ //Se for cons
+        if ((value & 0x31) == 17){ //Se for public
+          fprintf(outfp, pfRODATA pfALIGN pfGLOBL pfLABEL pfINTEGER pfTEXT, name, value);
+        } else
+          fprintf(outfp, pfRODATA pfALIGN pfLABEL pfINTEGER pfTEXT, name, value);
+      } else
+        fprintf(outfp, pfDATA pfALIGN pfLABEL pfINTEGER pfTEXT, name, value);
+    }
+  else if((value & 0x3) == 2){
+
+  }
+  else if((value & 0x3) == 3){
+
+  }
+}
+
+
+//fprintf(outfp, pfDATA pfALIGN pfLABEL pfINTEGER pfTEXT, name, value);

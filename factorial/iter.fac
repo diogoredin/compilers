@@ -1,0 +1,14 @@
+=< number factorial(integer x) - calcula o factorial de x, de forma iterativa. 
+	Retorna o valor do factorial. =>
+
+number factorial (integer x){
+	number fac
+	fac := 1.0
+
+	do {
+    fac :=fac * x
+	x := x -1
+ 	} while x > 1
+	
+	factorial := fac
+};

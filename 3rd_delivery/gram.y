@@ -55,21 +55,28 @@ extern FILE *out;
 %nonassoc UMINUS '!' NOT REF
 %nonassoc '[' '('
 
-%type <n> tipo init finit blocop params
+%type <n> tipo init finit blocop params decl def
 %type <n> bloco decls param base stmt step args list end brk lv expr
 %type <i> ptr intp public
 
-%token PROG LOCAL POSINC POSDEC PTR CALL START PARAM NIL
+%token PROG LOCAL POSINC POSDEC PTR CALL START PARAM NIL DECL FINIT
 
 %%
-file: 
-	| file error ';'
-	| file public tipo ID ';'	{ IDnew($3->value.i, $4, 0); declare($2, 0, $3, $4, 0); }
-	| file public CONST tipo ID ';'	{ IDnew($4->value.i+5, $5, 0); declare($2, 1, $4, $5, 0); }
-	| file public tipo ID init	{ IDnew($3->value.i, $4, 0); declare($2, 0, $3, $4, $5); }
-	| file public CONST tipo ID init	{ IDnew($4->value.i+5, $5, 0); declare($2, 1, $4, $5, $6); }
-	| file public tipo ID { enter($2, $3->value.i, $4); } finit { yyselect($6); function($2, $3, $4, $6); }
-	| file public VOID ID { enter($2, 4, $4); } finit { yyselect($6); function($2, intNode(VOID, 4), $4, $6); }
+file:	decl				{ Node *n = uniNode(PROG, $1); printNode(n, 0, (char**)yyname); yyselect(n); }
+	| /* nothing */
+	;
+
+decl: def					{ $$ = $1; }
+	| decl def			{ $$ = binNode(DECL, $1, $2); }
+	;
+
+def: error ';'									{ yyerrok; }
+	| public tipo ID ';'					{ IDnew($2->value.i, $3, 0); declare($1, 0, $2, $3, 0); }
+	| public CONST tipo ID ';'		{ IDnew($3->value.i+5, $4, 0); declare($1, 1, $3, $4, 0); }
+	| public tipo ID init					{ IDnew($2->value.i, $3, 0); declare($1, 0, $2, $3, $4); }
+	| public CONST tipo ID init		{ IDnew($3->value.i+5, $4, 0); declare($1, 1, $3, $4, $5); }
+	| public tipo ID 							{ enter($1, $2->value.i, $3); } finit { $$=binNode(FINIT, strNode(ID, $3), $5); function($1, $2, $3, $5); }
+	| public VOID ID 							{ enter($1, 4, $3); } finit { $$=binNode(FINIT, strNode(ID, $3), $5); function($3, intNode(VOID, 4), $3, $5); }
 	;
 
 public:           { $$ = 0; }

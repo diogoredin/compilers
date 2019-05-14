@@ -1,0 +1,56 @@
+
+=<  integer strcmp(string a, string b) - Compara as strings a e b.
+	
+	Retorna 0 se forem iguais,
+	retorna um numero inteiro positivo se a for maior,
+	retorna um numero inteiro negativo se b for maior. =>
+
+integer i
+
+integer strcmp(string a, string b){
+	i := 0
+	
+	do {
+		if a[i] = 0 then strcmp := 0
+		i := i +1;
+	} while a[i] = b[i];
+
+	if a > b then
+		strcmp := 1
+
+	if a < b then
+		strcmp := -1
+};
+
+
+=< string strcmp(string b, string a) - Copia a string a para b.
+	
+	Retorna a string b, uma copia da string a. =>
+
+string strcpy(string b, string a){
+	i := 0
+
+	do {
+		b[i] := a[i];
+		i := i + 1;
+	} while a[i] <> 0
+
+	strcpy := b
+};
+
+
+=< integer strchr(string a, integer i) - Procura o caracter i na string a.
+	
+	Retorna 0 se não encontrar,
+	retorna o endereço de i em a, se encontrar. =>
+
+integer strchr(string a, integer int){
+	i := 0
+
+	do {
+		if a[i] = i then
+			strchr := &a[i];
+	} while a[i] <> 0
+
+	strchr := 0
+};

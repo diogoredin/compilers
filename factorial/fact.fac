@@ -1,0 +1,16 @@
+=< entry do factorial =>
+
+public void printi(integer i)
+public integer atoi(string s)
+public number factorial(integer x)
+
+public integer entry (integer argc, string *argv, string *envp) {
+  
+    if argc >= 2 then {
+    printi(factorial(atoi(argv[1])))
+    }else {
+    printi(factorial(5))
+    }
+
+  	entry := 0
+};
