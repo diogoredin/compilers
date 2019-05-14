@@ -9,24 +9,23 @@
 
 extern int yylex();
 void yyerror(char *s);
-extern int yyselect(Node*);
 void declare(int pub, int cnst, Node *type, char *name, Node *value);
 void enter(int pub, int typ, char *name);
 int checkargs(char *name, Node *args);
 int nostring(Node *arg1, Node *arg2);
 int intonly(Node *arg, int);
 int noassign(Node *arg1, Node *arg2);
-
 static int ncicl;
 static char *fpar;
-extern int yylineno, trace;
 
-extern FILE *yyin;
-extern FILE *out;
+extern void evaluate(Node *p);
+extern void functionEvaluate(char *name, int enter, Node *body);
+extern void declareEvaluate(char *name, Node *value);
 
-#ifndef YYDEBUG
-#define yyname 0
-#endif
+int pos; /* local variable offset (no functions inside a function) */
+int lbl; /* label counter for generated labels */
+int cclbl; /* label counter for generated cicle labels */
+int p, nciclo, nivel; /* cycles */
 %}
 
 %union {
@@ -55,35 +54,27 @@ extern FILE *out;
 %nonassoc UMINUS '!' NOT REF
 %nonassoc '[' '('
 
-%type <n> tipo init finit blocop params decl def
+%type <n> tipo init finit blocop params
 %type <n> bloco decls param base stmt step args list end brk lv expr
 %type <i> ptr intp public
 
-%token PROG LOCAL POSINC POSDEC PTR CALL START PARAM NIL DECL FINIT
-
+%token LOCAL POSINC POSDEC PTR CALL START PARAM NIL
 %%
-file:	decl				{ Node *n = uniNode(PROG, $1); printNode(n, 0, (char**)yyname); yyselect(n); }
-	| /* nothing */
+file	:
+	| file error ';'
+	| file public tipo ID ';'	{ IDnew($3->value.i, $4, 0); declare($2, 0, $3, $4, 0); }
+	| file public CONST tipo ID ';'	{ IDnew($4->value.i+5, $5, 0); declare($2, 1, $4, $5, 0); }
+	| file public tipo ID init	{ IDnew($3->value.i, $4, 0); declare($2, 0, $3, $4, $5); }
+	| file public CONST tipo ID init	{ IDnew($4->value.i+5, $5, 0); declare($2, 1, $4, $5, $6); }
+	| file public tipo ID { enter($2, $3->value.i, $4); } finit { function($2, $3, $4, $6); functionEvaluate($4, 4, $6); }
+	| file public VOID ID { enter($2, 4, $4); } finit { function($2, intNode(VOID, 4), $4, $6); functionEvaluate($4, 4, $6); }
 	;
 
-decl: def					{ $$ = $1; }
-	| decl def			{ $$ = binNode(DECL, $1, $2); }
-	;
-
-def: error ';'									{ yyerrok; }
-	| public tipo ID ';'					{ IDnew($2->value.i, $3, 0); declare($1, 0, $2, $3, 0); }
-	| public CONST tipo ID ';'		{ IDnew($3->value.i+5, $4, 0); declare($1, 1, $3, $4, 0); }
-	| public tipo ID init					{ IDnew($2->value.i, $3, 0); declare($1, 0, $2, $3, $4); }
-	| public CONST tipo ID init		{ IDnew($3->value.i+5, $4, 0); declare($1, 1, $3, $4, $5); }
-	| public tipo ID 							{ enter($1, $2->value.i, $3); } finit { $$=binNode(FINIT, strNode(ID, $3), $5); function($1, $2, $3, $5); }
-	| public VOID ID 							{ enter($1, 4, $3); } finit { $$=binNode(FINIT, strNode(ID, $3), $5); function($3, intNode(VOID, 4), $3, $5); }
-	;
-
-public:           { $$ = 0; }
+public	:         { $$ = 0; }
 	| PUBLIC        { $$ = 1; }
 	;
 
-ptr:              { $$ = 0; }
+ptr	:             { $$ = 0; }
 	| '*'           { $$ = 10; }
 	;
 
@@ -101,11 +92,11 @@ init	: ATR ID ';'		{ $$ = strNode(ID, $2); $$->info = IDfind($2, 0) + 10; }
 	| ATR '-' REAL ';'	{ $$ = realNode(REAL, -$3); $$->info = 3; }
         ;
 
-finit	: '(' params ')' blocop { $$ = binNode('(', $4, $2); }
+finit   : '(' params ')' blocop { $$ = binNode('(', $4, $2); }
 	| '(' ')' blocop        { $$ = binNode('(', $3, 0); }
 	;
 
-blocop  : ';'   			{ $$ = nilNode(NIL); }
+blocop  : ';'   { $$ = nilNode(NIL); }
         | bloco ';'   { $$ = $1; }
         ;
 
@@ -218,7 +209,6 @@ expr	: lv		{ $$ = uniNode(PTR, $1); $$->info = $1->info; }
 	;
 
 %%
-
 char **yynames =
 #if YYDEBUG > 0
 		 (char**)yyname;
@@ -226,8 +216,13 @@ char **yynames =
 		 0;
 #endif
 
-void declare(int pub, int cnst, Node *type, char *name, Node *value)
-{
+/******************************************************************
+*
+*		NODE CREATION
+*
+*******************************************************************/
+
+void declare(int pub, int cnst, Node *type, char *name, Node *value) {
   int typ;
   if (!value) {
     if (!pub && cnst) yyerror("local constants must be initialised");
@@ -239,6 +234,18 @@ void declare(int pub, int cnst, Node *type, char *name, Node *value)
   if (type->value.i != typ)
     yyerror("wrong types in initialization");
 }
+
+void function(int pub, Node *type, char *name, Node *body) {
+	Node *bloco = LEFT_CHILD(body);
+	IDpop();
+	if (bloco != 0) { /* not a forward declaration */
+		long par;
+		int fwd = IDfind(name, &par);
+		if (fwd > 40) yyerror("duplicate function");
+		else IDreplace(fwd+40, name, par);
+	}
+}
+
 void enter(int pub, int typ, char *name) {
 	fpar = malloc(32); /* 31 arguments, at most */
 	fpar[0] = 0; /* argument count */
@@ -247,6 +254,12 @@ void enter(int pub, int typ, char *name) {
 	IDpush();
 	if (typ != 4) IDnew(typ, name, 0);
 }
+
+/******************************************************************
+*
+*		ARGUMENTS CHECKING
+*
+*******************************************************************/
 
 int checkargs(char *name, Node *args) {
 	char *arg;
@@ -313,16 +326,4 @@ int noassign(Node *arg1, Node *arg2) {
 	if (t1 > 10 && t1 < 20 && arg2->attrib == INT && arg2->value.i == 0)
 		return 0; /* pointer := 0 */
 	return 1;
-}
-
-void function(int pub, Node *type, char *name, Node *body)
-{
-	Node *bloco = LEFT_CHILD(body);
-	IDpop();
-	if (bloco != 0) { /* not a forward declaration */
-		long par;
-		int fwd = IDfind(name, &par);
-		if (fwd > 40) yyerror("duplicate function");
-		else IDreplace(fwd+40, name, par);
-	}
 }

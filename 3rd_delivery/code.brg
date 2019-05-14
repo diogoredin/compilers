@@ -18,18 +18,18 @@ static char *mklbl(int n);
 %start prog
 
 %%
-prog: PROG(decl) 1 				{}
-decl: DECL(func) 1 				{}
-func: FINIT 1 					{}
-%!params: param 1 				{}
-%!params: COM(params,param) 1 	{}
-%!param: PARAM(tipo,ID) 1 		{}
-%!tipo: INTEGER 1 				{}
-%!tipo: STRING 1 				{}
-%!tipo: NUMBER 1 				{}
-%!blocop: bloco 1 				{}
-%!bloco: BLCK 1 				{ fprintf(yyout, pfTRASH); }
-%!bloco: NIL 1 					{ fprintf(yyout, pfNIL); }
+prog: decl 1 					{ fprintf(yyout, pfIMM pfPOP pfRET pfEXTRN, ".prints", ".println"); }
+decl: func 1 					{}
+func: FUNC(blocop,params) 1 	{}
+params: param 1 				{}
+params: COM(params,param) 1 	{}
+param: PARAM(tipo,ID) 1 		{}
+tipo: INTEGER 1 				{}
+tipo: STRING 1 					{}
+tipo: NUMBER 1 					{}
+blocop: bloco 1 				{}
+bloco: BLCK 1 					{}
+bloco: NIL 1 					{}
 %%
 
 extern char **yynames;
@@ -54,17 +54,77 @@ static void outstr(char *s) {
 	fprintf(yyout, pfCHAR, 0);
 }
 
+/******************************************************************
+*
+*	CODE PRODUCTION FOR BURG (called on YACC)
+*
+*******************************************************************/
+
+/* Original evaluation */
 void evaluate(Node *p) {
 	extern int trace, errors;
 
 	if (errors) return;
 	if (trace) printNode(p, stdout, yynames);
 
-	fprintf(yyout, pfTEXT pfALIGN pfGLOBL pfLABEL, "_main", pfFUNC, "_main");
+	fprintf(yyout, pfTEXT pfALIGN pfGLOBL pfLABEL, "_entry", pfFUNC, "_entry");
 	
 	yyselect(p);
 	fprintf(yyout, pfRET pfDATA);
 
 	IDevery(data,0);
 	fprintf(yyout, pfEXTRN pfEXTRN pfEXTRN pfEXTRN, "_prints", "_printi", "_println", "_readi");
+}
+
+/* Function evaluation */
+void functionEvaluate(char *name, int enter, Node *body) {
+  int i;
+  int tipo = IDfind(name, 0);
+
+  if (tipo >= 32) 
+      tipo -= 32;
+
+  extern int trace;
+
+  if(trace) printNode(body, stdout, yynames);
+  if (body == 0 || body->attrib == NIL) /* forward declaration */
+    fprintf(yyout, pfEXTRN, name);
+  else { /* function body */
+    if (strcmp(name, "entry") == 0) // para a funcao entry
+      fprintf(yyout, pfTEXT pfALIGN pfGLOBL pfLABEL pfENTER, "_entry", pfFUNC, "_entry", enter);
+    else
+    fprintf(yyout, pfTEXT pfALIGN pfGLOBL pfLABEL pfENTER, name, pfFUNC, name, enter);
+    if (yyselect(body) == 1) yyerror("No match for syntactic tree.");
+    if(tipo != 0)
+    { fprintf(yyout, pfLOCAL pfLOAD pfPOP pfLEAVE pfRET, -4);}
+
+    else fprintf(yyout, pfLEAVE pfRET); /* just in case there is no 'return' */
+  }
+}
+
+/* Declare evaluation */
+void declareEvaluate(char *name, Node *value) {
+  int tipo = IDfind(name, 0);
+
+  if (tipo == 0 || value == 0)
+    fprintf(yyout, pfBSS pfALIGN pfLABEL pfBYTE pfTEXT, name, 4);
+  else {
+    if ((tipo & 0x15) >= 9) fprintf(yyout, pfRODATA);    //CONS
+    else fprintf(yyout, pfDATA);
+
+    fprintf(yyout, pfALIGN);
+
+    if ((tipo & 0x31) >= 17){                            //PUBLIC
+      if ((tipo & 0x3) == 1) fprintf(yyout, pfGLOBL, name, pfINTEGER);
+      else if ((tipo & 0x3) == 2) fprintf(yyout, pfGLOBL, name, pfSTR);
+    }
+
+    fprintf(yyout, pfLABEL, name);
+
+    if ((tipo & 0x7) >= 5) fprintf(yyout, pfID, value->value.s);  //PTR
+    else if ((tipo & 0x3) == 1) fprintf(yyout, pfINTEGER, value->value.i);
+    else if ((tipo & 0x3) == 1) fprintf(yyout, pfSTR, value->value.s);
+
+    fprintf(yyout, pfTEXT);
+  }
 }
