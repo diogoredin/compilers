@@ -19,6 +19,8 @@ extern int yyerror(char *s);
 %start prog
 
 %%
+
+%! Programa, Funcoes e Declaracoes
 prog: decl 1 					{}
 decl: func 1 					{}
 func: FUNC(blocop,params) 1 	{}
@@ -29,8 +31,29 @@ tipo: INTEGER 1 				{}
 tipo: STRING 1 					{}
 tipo: NUMBER 1 					{}
 blocop: bloco 1 				{}
-bloco: BLCK 1 					{}
-bloco: NIL 1 					{ fprintf(yyout, pfEXTRN, ".prints"); }
+bloco: NIL 1 					{}
+
+%! Bloco e Base
+bloco: BLCK(list,decls) 1 		{}
+list: base 1					{}
+list: END(list,base) 1			{}
+decls: NIL 1					{}
+decls: END(decls,param) 1		{}
+base: VOID 1 					{}
+base: NIL 1 					{}
+base: expr 1					{}
+
+%! Argumentos e Expressoes 
+args: COM(args,expr) 1			{}
+args: COM(NIL,expr) 1			{}
+expr: CALL(ID,args) 1			{}
+expr: STR 1						{}
+expr: INT 1						{}
+expr: REAL 1					{}
+expr: ATR(expr,lv) 1			{}
+lv: ID 1						{}
+lv: LOCAL 1						{}
+
 %%
 
 extern char **yynames;
@@ -87,7 +110,7 @@ void functionEvaluate(char *name, int enter, Node *body) {
       tipo -= 32;
 
   extern int trace;
-  if(trace) printNode(body, stdout, yynames);
+  printNode(body, stdout, yynames);
 
   if ( LEFT_CHILD(body)->value.s == 0 || LEFT_CHILD(body)->attrib == NIL) {
 	fprintf(yyout, pfEXTRN, name);

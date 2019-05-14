@@ -107,7 +107,7 @@ params	: param
 bloco	: '{' { IDpush(); } decls list end '}'    { $$ = binNode('{', $5 ? binNode(';', $4, $5) : $4, $3); IDpop(); }
 	;
 
-decls	:                       { $$ = 0; }
+decls	:                       { $$ = nilNode(NIL); }
 	| decls param ';'       { $$ = binNode(';', $1, $2); }
 	;
 
