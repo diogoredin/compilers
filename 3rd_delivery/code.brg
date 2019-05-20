@@ -15,7 +15,7 @@ extern int yyerror(char *s);
 
 %include "y.tab.h"
 
-%term END=';' ASSIGN='=' ADD='+' SUB='-' MUL='*' DIV='/' MOD='%' LT='<' GT='>' 
+%term END=';' ADD='+' SUB='-' MUL='*' DIV='/' MOD='%' LT='<' GT='>' EQU='=' AND='&' OR='|'
 %term FUNC='(' COM=',' BLCK='{'
 
 %start prog
@@ -49,11 +49,28 @@ args: COM(args,expr) 1			  {}
 args: COM(NIL,expr) 1			    {}
 expr: CALL(ID,args) 1			    { fprintf(yyout, pfCALL, mkfunc(LEFT_CHILD(p)->value.s)); if (RIGHT_CHILD(p)->place) fprintf(yyout, pfTRASH, (int)(pfWORD*(RIGHT_CHILD(p)->place))); }
 expr: STR 1						        { lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL, mklbl(lbl)); outstr(p->value.s); fprintf(yyout, pfTEXT pfADDR, mklbl(lbl)); }
-expr: INT 1						        {}
+expr: INT 1						        { fprintf(yyout, pfIMM, p->value.i); }
 expr: REAL 1					        {}
 expr: ATR(expr,lv) 1			    {}
 lv: ID 1						          {}
 lv: LOCAL 1						        {}
+
+%! Operacoes com Expressoes
+expr:	ADD(expr,expr) 1        { fprintf(yyout, pfADD); }
+expr:	SUB(expr,expr) 1        { fprintf(yyout, pfSUB); }
+expr:	MUL(expr,expr) 1        { fprintf(yyout, pfMUL); }
+expr:	DIV(expr,expr) 1        { fprintf(yyout, pfDIV); }
+expr:	MOD(expr,expr) 1        { fprintf(yyout, pfMOD); }
+expr:	LT(expr,expr)	1         { fprintf(yyout, pfLT); }
+expr:	GT(expr,expr)	1         { fprintf(yyout, pfGT); }
+expr:	GE(expr,expr)	1         { fprintf(yyout, pfGE); }
+expr:	LE(expr,expr)	1         { fprintf(yyout, pfLE); }
+expr:	NE(expr,expr)	1         { fprintf(yyout, pfNE); }
+expr:	EQU(expr,expr)	1       { fprintf(yyout, pfEQ); }
+expr:	AND(and,expr)	1         { fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(p)->place)); }
+and:	expr 1                  { p->place = ++lbl; fprintf(yyout, pfDUP pfJZ pfTRASH, mklbl(p->place), pfWORD); }
+expr:	OR(or,expr)	1           { fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(p)->place)); }
+or:	expr 1                    { p->place = ++lbl; fprintf(yyout, pfDUP pfJNZ pfTRASH, mklbl(p->place), pfWORD); }
 
 %%
 
