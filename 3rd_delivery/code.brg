@@ -145,11 +145,12 @@ void functionEvaluate(char *name, int enter, Node *body) {
 	printNode(body, stdout, yynames);
 
 	/* Stack overflow */
-	if ( IDPosition > overflow) {
+	if (IDPosition > overflow) {
 		IDPosition = IDPosition - overflow;
 	}
 
-	if ( LEFT_CHILD(body)->value.s == 0 || LEFT_CHILD(body)->attrib == NIL ) {
+	/* Left Child is blocop */
+	if (LEFT_CHILD(body)->value.s == 0 || LEFT_CHILD(body)->attrib == NIL) {
 		fprintf(yyout, pfEXTRN, mkfunc(name));
 
 	} else {
@@ -179,28 +180,40 @@ void functionEvaluate(char *name, int enter, Node *body) {
 }
 
 /* Declare evaluation */
-void declareEvaluate(char *name, Node *value) {
-  int tipo = IDfind(name, 0);
+void declareEvaluate(char *type, char *name, int enter, Node *init) {
 
-  if (tipo == 0 || value == 0)
-    fprintf(yyout, pfBSS pfALIGN pfLABEL pfBYTE pfTEXT, name, 4);
-  else {
-    if ((tipo & 0x15) >= 9) fprintf(yyout, pfRODATA);    //CONS
-    else fprintf(yyout, pfDATA);
+	int i;
+	int overflow = 32;
+	int IDPosition = IDfind(name,0);
 
-    fprintf(yyout, pfALIGN);
+	/* Stack overflow */
+	if (IDPosition > overflow) {
+		IDPosition = IDPosition - overflow;
+	}
 
-    if ((tipo & 0x31) >= 17){                            //PUBLIC
-      if ((tipo & 0x3) == 1) fprintf(yyout, pfGLOBL, name, pfINTEGER);
-      else if ((tipo & 0x3) == 2) fprintf(yyout, pfGLOBL, name, pfSTR);
-    }
+	/* CONST */
+	if (strcmp(type, "CONST") == 0) {
+		fprintf(yyout, pfDATA pfALIGN pfLABEL, name);
+	}
 
-    fprintf(yyout, pfLABEL, name);
+	/* INTEGER, STRING or NUMBER */
+	else if (strcmp(type, "TYPE") == 0) {
+		fprintf(yyout, pfDATA pfALIGN pfLABEL, name);
+	}
 
-    if ((tipo & 0x7) >= 5) fprintf(yyout, pfID, value->value.s);  //PTR
-    else if ((tipo & 0x3) == 1) fprintf(yyout, pfINTEGER, value->value.i);
-    else if ((tipo & 0x3) == 1) fprintf(yyout, pfSTR, value->value.s);
+	/* Declare the appriate type of variable */
+	switch(init->type) {
+		case nodeInt:
+			fprintf(yyout, pfINTEGER, init->value.i);
+			break;
 
-    fprintf(yyout, pfTEXT);
-  }
+		case nodeReal:
+			fprintf(yyout, pfFLOAT, init->value.r);
+			break;
+
+		case nodeStr:
+			fprintf(yyout, pfSTR, init->value.s);
+			break;
+	}
+
 }

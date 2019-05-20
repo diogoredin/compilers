@@ -20,7 +20,7 @@ static char *fpar;
 
 extern void evaluate(Node *p);
 extern void functionEvaluate(char *name, int enter, Node *body);
-extern void declareEvaluate(char *name, Node *value);
+extern void declareEvaluate(char *type, char *name, int enter, Node *init);
 
 int pos; /* local variable offset (no functions inside a function) */
 int lbl; /* label counter for generated labels */
@@ -64,8 +64,8 @@ file	:
 	| file error ';'
 	| file public tipo ID ';'	{ IDnew($3->value.i, $4, 0); declare($2, 0, $3, $4, 0); }
 	| file public CONST tipo ID ';'	{ IDnew($4->value.i+5, $5, 0); declare($2, 1, $4, $5, 0); }
-	| file public tipo ID init	{ IDnew($3->value.i, $4, 0); declare($2, 0, $3, $4, $5); }
-	| file public CONST tipo ID init	{ IDnew($4->value.i+5, $5, 0); declare($2, 1, $4, $5, $6); }
+	| file public tipo ID init	{ IDnew($3->value.i, $4, 0); declare($2, 0, $3, $4, $5); declareEvaluate("TYPE", $4, $3->value.i, $5); }
+	| file public CONST tipo ID init	{ IDnew($4->value.i+5, $5, 0); declare($2, 1, $4, $5, $6); declareEvaluate("CONST", $5, $4->value.i, $6); }
 	| file public tipo ID { enter($2, $3->value.i, $4); } finit { function($2, $3, $4, $6); functionEvaluate($4, $3->value.i, $6); }
 	| file public VOID ID { enter($2, 4, $4); } finit { function($2, intNode(VOID, 4), $4, $6); functionEvaluate($4, 4, $6); }
 	;
@@ -159,7 +159,7 @@ args	: expr		{ $$ = binNode(',', $1, nilNode(NIL)); }
 lv	: ID		{ long pos; int typ = IDfind($1, &pos);
                           if (pos == 0) $$ = strNode(ID, $1);
                           else $$ = intNode(LOCAL, pos);
-			  $$->info = typ; $$->user = pos;
+			  $$->info = typ; $$->user = (int*)pos;
 			}
 	| ID '[' expr ']' { Node *n;
                             long pos; int siz, typ = IDfind($1, &pos);

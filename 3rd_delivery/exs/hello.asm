@@ -11,7 +11,7 @@ $_entry:
 ; ENTER
 	push	ebp
 	mov	ebp, esp
-	sub	esp, 4
+	sub	esp, 1
 ; RODATA
 segment	.rodata
 ; ALIGN
@@ -54,6 +54,8 @@ segment	.text
 	call	$_prints
 ; TRASH
 	add	esp, -4
+; PUSH
+	push	eax
 ; TRASH
 	add	esp, 4
 ; IMM
@@ -72,9 +74,6 @@ segment	.text
 ; LOCAL
 	lea	eax, [ebp+-4]
 	push	eax
-; LOAD
-	pop	eax
-	push	dword [eax]
 ; POP
 	pop	eax
 ; LEAVE
