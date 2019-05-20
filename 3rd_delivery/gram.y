@@ -66,7 +66,7 @@ file	:
 	| file public CONST tipo ID ';'	{ IDnew($4->value.i+5, $5, 0); declare($2, 1, $4, $5, 0); }
 	| file public tipo ID init	{ IDnew($3->value.i, $4, 0); declare($2, 0, $3, $4, $5); }
 	| file public CONST tipo ID init	{ IDnew($4->value.i+5, $5, 0); declare($2, 1, $4, $5, $6); }
-	| file public tipo ID { enter($2, $3->value.i, $4); } finit { function($2, $3, $4, $6); functionEvaluate($4, 4, $6); }
+	| file public tipo ID { enter($2, $3->value.i, $4); } finit { function($2, $3, $4, $6); functionEvaluate($4, $3->value.i, $6); }
 	| file public VOID ID { enter($2, 4, $4); } finit { function($2, intNode(VOID, 4), $4, $6); functionEvaluate($4, 4, $6); }
 	;
 

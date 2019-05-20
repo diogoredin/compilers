@@ -47,7 +47,7 @@ base: expr 1					{ fprintf(yyout, pfTRASH, pfWORD); }
 %! Arguments and expressions
 args: COM(expr,args) 1			{}
 args: COM(expr,NIL) 1			{}
-expr: CALL(ID,args) 1			{ fprintf(yyout, pfCALL, mkfunc(LEFT_CHILD(p)->value.s)); if (RIGHT_CHILD(p)->place) fprintf(yyout, pfTRASH, (int)(pfWORD*(RIGHT_CHILD(p)->place))); }
+expr: CALL(ID,args) 1			{ fprintf(yyout, pfCALL pfTRASH pfPUSH, mkfunc(LEFT_CHILD(p)->value.s), (int)(pfWORD*(RIGHT_CHILD(p)->place))); }
 expr: STR 1						{ lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL, mklbl(lbl)); outstr(p->value.s); fprintf(yyout, pfTEXT pfADDR, mklbl(lbl)); }
 expr: INT 1						{ fprintf(yyout, pfIMM, p->value.i); }
 expr: REAL 1					{}
@@ -145,7 +145,7 @@ void functionEvaluate(char *name, int enter, Node *body) {
 	printNode(body, stdout, yynames);
 
 	/* Stack overflow */
-	if ( IDPosition > overflow || IDPosition == overflow ) {
+	if ( IDPosition > overflow) {
 		IDPosition = IDPosition - overflow;
 	}
 
@@ -170,7 +170,7 @@ void functionEvaluate(char *name, int enter, Node *body) {
 
 		/* Return functions */
 		if (IDPosition != 0) {
-			fprintf(yyout, pfLOCAL pfLOAD pfPOP pfLEAVE pfRET, -4); /* -4 assumes int */
+			fprintf(yyout, pfLOCAL pfPOP pfLEAVE pfRET, -4); /* -4 assumes int */
 		} else {
 			fprintf(yyout, pfLEAVE pfRET);
 		}
