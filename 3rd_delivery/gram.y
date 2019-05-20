@@ -159,7 +159,7 @@ args	: expr		{ $$ = binNode(',', nilNode(NIL), $1); }
 lv	: ID		{ long pos; int typ = IDfind($1, &pos);
                           if (pos == 0) $$ = strNode(ID, $1);
                           else $$ = intNode(LOCAL, pos);
-			  $$->info = typ;
+			  $$->info = typ; $$->user = pos;
 			}
 	| ID '[' expr ']' { Node *n;
                             long pos; int siz, typ = IDfind($1, &pos);

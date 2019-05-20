@@ -54,6 +54,21 @@ segment	.text
 	call	$_prints
 ; TRASH
 	add	esp, -4
+; TRASH
+	add	esp, 4
+; IMM
+	push	dword 0
+; COPY
+	push	dword [esp]
+; LOCAL
+	lea	eax, [ebp+0]
+	push	eax
+; STORE
+	pop	ecx
+	pop	eax
+	mov	[ecx], eax
+; TRASH
+	add	esp, 4
 ; LOCAL
 	lea	eax, [ebp+-4]
 	push	eax
