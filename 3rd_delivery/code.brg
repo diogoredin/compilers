@@ -7,6 +7,7 @@
 
 extern FILE *yyout;
 static int lbl;
+static long brklbl[20], brkcnt;
 static char *mklbl(int n);
 static char *mkfunc(char *s);
 static void outstr(char *s);
@@ -43,11 +44,27 @@ decls: END(decls,param) 1		{}
 base: VOID 1 					{}
 base: NIL 1 					{}
 base: expr 1					{ fprintf(yyout, pfTRASH, pfWORD); }
+base: block 1					{}
+
+%! If Then Else
+stmt: base 1					{}
+stmt: BREAK 1					{}
+stmt: CONTINUE 1				{}
+base: if 1						{}
+if: IF(cond,stmt) 1				{ p->place = ++lbl; fprintf(yyout, pfJMP pfLABEL, mklbl(p->place), mklbl(LEFT_CHILD(p)->place));}
+base: ELSE(if, stmt) 1			{ fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(p)->place)); }
+cond: expr 1					{ p->place = ++lbl; fprintf(yyout, pfJZ, mklbl(p->place)); }
+
+%! While and Do
+stmt: WHILE(do,stmt) 1			{ brkcnt--; fprintf(yyout, pfJMP pfLABEL, mklbl(LEFT_CHILD(LEFT_CHILD(p))->place), mklbl(LEFT_CHILD(p)->place)); }
+do:	DO(begin,expr) 1			{ p->place = (brklbl[++brkcnt] = ++lbl); fprintf(yyout, pfJZ, mklbl(lbl)); }
+begin: START 1					{ p->place = ++lbl; fprintf(yyout, pfLABEL, mklbl(lbl)); }
 
 %! Arguments and expressions
 args: COM(expr,args) 1			{}
 args: COM(expr,NIL) 1			{}
 expr: CALL(ID,args) 1			{ fprintf(yyout, pfCALL pfTRASH pfPUSH, mkfunc(LEFT_CHILD(p)->value.s), (int)(pfWORD*(RIGHT_CHILD(p)->place))); }
+expr: CALL(ID,VOID) 1			{ fprintf(yyout, pfCALL pfTRASH, mkfunc(LEFT_CHILD(p)->value.s)); }
 expr: STR 1						{ lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL, mklbl(lbl)); outstr(p->value.s); fprintf(yyout, pfTEXT pfADDR, mklbl(lbl)); }
 expr: INT 1						{ fprintf(yyout, pfIMM, p->value.i); }
 expr: REAL 1					{}
@@ -161,7 +178,7 @@ void functionEvaluate(char *name, int enter, Node *body) {
 
 		/* OTHER Functions */
 		} else {
-			fprintf(yyout, pfTEXT pfALIGN pfGLOBL pfLABEL pfENTER, name, pfFUNC, name, enter);
+			fprintf(yyout, pfTEXT pfALIGN pfGLOBL pfLABEL pfENTER, mkfunc(name), pfFUNC,mkfunc(name), enter);
 		}
 
 		/* yyselect inits instruction selection for rest of the tree */
