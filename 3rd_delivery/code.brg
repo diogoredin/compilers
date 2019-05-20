@@ -125,7 +125,7 @@ void evaluate(Node *p) {
 	if (trace) printNode(p, stdout, yynames);
 
 	fprintf(yyout, pfTEXT pfALIGN pfGLOBL pfLABEL, "_entry", pfFUNC, "_entry");
-	
+
 	yyselect(p);
 	fprintf(yyout, pfRET pfDATA);
 
@@ -136,28 +136,46 @@ void evaluate(Node *p) {
 /* Function evaluation */
 void functionEvaluate(char *name, int enter, Node *body) {
 
-  int i;
-  int tipo = IDfind(name, 0);
+	int i;
+	int overflow = 32;
+	int IDPosition = IDfind(name,0);
 
-  if (tipo >= 32) 
-      tipo -= 32;
+	/* Print Tree of function */
+	extern int trace;
+	printNode(body, stdout, yynames);
 
-  extern int trace;
-  printNode(body, stdout, yynames);
+	/* Stack overflow */
+	if ( IDPosition > overflow || IDPosition == overflow ) {
+		IDPosition = IDPosition - overflow;
+	}
 
-  if ( LEFT_CHILD(body)->value.s == 0 || LEFT_CHILD(body)->attrib == NIL) {
-	  fprintf(yyout, pfEXTRN, mkfunc(name));
-  } else {
-    if (strcmp(name, "entry") == 0) // para a funcao entry
-      fprintf(yyout, pfTEXT pfALIGN pfGLOBL pfLABEL pfENTER, "_entry", pfFUNC, "_entry", enter);
-    else
-    fprintf(yyout, pfTEXT pfALIGN pfGLOBL pfLABEL pfENTER, name, pfFUNC, name, enter);
-    if (yyselect(body) == 1) yyerror("No match for syntactic tree.");
-    if(tipo != 0)
-    { fprintf(yyout, pfLOCAL pfLOAD pfPOP pfLEAVE pfRET, -4);}
+	if ( LEFT_CHILD(body)->value.s == 0 || LEFT_CHILD(body)->attrib == NIL ) {
+		fprintf(yyout, pfEXTRN, mkfunc(name));
 
-    else fprintf(yyout, pfLEAVE pfRET); /* just in case there is no 'return' */
-  }
+	} else {
+
+		/* ENTRY Function */
+		if (strcmp(name, "entry") == 0) {
+			fprintf(yyout, pfTEXT pfALIGN pfGLOBL pfLABEL pfENTER, "_entry", pfFUNC, "_entry", enter);
+
+		/* OTHER Functions */
+		} else {
+			fprintf(yyout, pfTEXT pfALIGN pfGLOBL pfLABEL pfENTER, name, pfFUNC, name, enter);
+		}
+
+		/* yyselect inits instruction selection for rest of the tree */
+		if (yyselect(body) == 1) {
+			yyerror("No match found.");
+		}
+
+		/* Return functions */
+		if (IDPosition != 0) {
+			fprintf(yyout, pfLOCAL pfLOAD pfPOP pfLEAVE pfRET, -4); /* -4 assumes int */
+		} else {
+			fprintf(yyout, pfLEAVE pfRET);
+		}
+
+	}
 }
 
 /* Declare evaluation */
