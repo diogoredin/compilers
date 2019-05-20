@@ -152,8 +152,8 @@ list	: base
 	| list base     { $$ = binNode(';', $1, $2); }
 	;
 
-args	: expr		{ $$ = binNode(',', nilNode(NIL), $1); }
-	| args ',' expr { $$ = binNode(',', $1, $3); }
+args	: expr		{ $$ = binNode(',', $1, nilNode(NIL)); }
+	| args ',' expr { $$ = binNode(',', $3, $1); }
 	;
 
 lv	: ID		{ long pos; int typ = IDfind($1, &pos);
@@ -283,7 +283,7 @@ int checkargs(char *name, Node *args) {
 				err = 1;
 				break;
 			}
-			n = RIGHT_CHILD(args);
+			n = LEFT_CHILD(args);
 			typ = n->info;
 			if (typ % 10 > 5) typ -= 5; /* remove CONST */
 			null =  (n->attrib == INT && n->value.i == 0 && arg[i] > 10) ? 1 : 0;
@@ -292,7 +292,7 @@ int checkargs(char *name, Node *args) {
 				err = 1;
 				break;
 			}
-			args = LEFT_CHILD(args);
+			args = RIGHT_CHILD(args);
 			i--;
 		} while (args->attrib != NIL);
 		if (!err && i > 0)

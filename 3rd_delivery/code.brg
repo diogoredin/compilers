@@ -45,8 +45,8 @@ base: NIL 1 					{}
 base: expr 1					{ fprintf(yyout, pfTRASH, pfWORD); }
 
 %! Arguments and expressions
-args: COM(args,expr) 1			{}
-args: COM(NIL,expr) 1			{}
+args: COM(expr,args) 1			{}
+args: COM(expr,NIL) 1			{}
 expr: CALL(ID,args) 1			{ fprintf(yyout, pfCALL, mkfunc(LEFT_CHILD(p)->value.s)); if (RIGHT_CHILD(p)->place) fprintf(yyout, pfTRASH, (int)(pfWORD*(RIGHT_CHILD(p)->place))); }
 expr: STR 1						{ lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL, mklbl(lbl)); outstr(p->value.s); fprintf(yyout, pfTEXT pfADDR, mklbl(lbl)); }
 expr: INT 1						{ fprintf(yyout, pfIMM, p->value.i); }
@@ -56,7 +56,7 @@ expr: REAL 1					{}
 expr: PTR(lval)               	{ /* No code, but keep PTR to avoid missing LOADs */ }
 lval: INDEX(lvec,expr) 1      	{ fprintf(yyout, pfIMM pfMUL pfADD, pfWORD); }
 lvec: lval 1                  	{ fprintf(yyout, pfLOAD); }
-lval: LOCAL 1                 	{ fprintf(yyout, pfLOCAL, mkfunc(p->value.s)); }
+lval: LOCAL 1                 	{ fprintf(yyout, pfADDR, p->value.s); }
 lval: ID 1                    	{ fprintf(yyout, pfLOCAL, p->user); /* position calculated in yacc */ }
 
 %! Atribution
