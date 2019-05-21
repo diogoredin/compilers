@@ -2,7 +2,7 @@
 COMP=../diy # compiler
 EXT=diy # file extension: .$(EXT)
 LIB=run # runtime library: lib$(LIB).a
-RUN=../runtime # runtime directory
+RUN=../run # runtime directory
 AS=nasm -felf # assembler command
 LD=ld -melf_i386 # loader command
 

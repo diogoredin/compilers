@@ -1,34 +1,29 @@
-.SUFFIXES: .brg .asm
-
-COMPILER=diy
-RUNTIME=runtime/librun.a
-UTIL=lib/libutil.a
-
+LANG=diy
+EXT=diy # file extension: .$(EXT)
+LIB=lib # compiler library directory
+UTIL=util # compiler library: lib$(LIB).a
+RUN=run # runtime directory
+EXS=exs # examples directory
 CC=gcc
-CFLAGS=-g -Ilib -DYYDEBUG
-LEX=flex
-LFLAGS=-l
-YACC=byacc
-YFLAGS=-dv
-BURG=./pburg
-BFLAGS=-T -n
-LDLIBS=-L lib -lutil
+CFLAGS=-g -DYYDEBUG
 
-all: $(COMPILER) $(RUNTIME)
-$(COMPILER): scan.o gram.o code.o $(UTIL)
-	$(LINK.c) -o $@ $^
-$(UTIL):
-	make -C lib
-$(RUNTIME):
-	make -C runtime install
-.brg.c:
-	$(BURG) $(BFLAGS) $< $@
-%: %.diy
-	./diy $<
-	nasm -felf64 $*.asm
-	gcc $*.o -o $@ runtime/librun.a
-code.c: gram.c
-scan.c: gram.c
-clean:
-	rm -f y.tab.h y.output diy *.asm *.o scan.c gram.c code.c
+$(LANG): $(LANG).y $(LANG).l $(LANG).brg
+	make -C $(LIB)
+	byacc -dv $(LANG).y
+	flex -l $(LANG).l
+	./pburg -T $(LANG).brg
+	$(LINK.c) -o $(LANG) $(ARCH) -I$(LIB) lex.yy.c y.tab.c yyselect.c -L$(LIB) -l$(UTIL)
+
+examples:: $(LANG)
+	make -C $(EXS)
+
+clean::
+	make -C $(LIB) clean
+	make -C $(RUN) clean
+	make -C $(EXS) clean
+	rm -f .DS_Store
+	rm -f *.o $(LANG) lex.yy.c y.tab.c y.tab.h y.output yyselect.c *.asm *~
 	clear
+
+zip:
+	zip proj diy.l diy.y diy.brg Makefile
