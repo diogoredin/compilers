@@ -17,15 +17,12 @@ int intonly(Node *arg, int);
 int noassign(Node *arg1, Node *arg2);
 static int ncicl;
 static char *fpar;
+int pos;
 
 extern void evaluate(Node *p);
 extern void functionEvaluate(char *name, int enter, Node *body);
 extern void declareEvaluate(char *type, char *name, int enter, Node *init);
 
-int pos; /* local variable offset (no functions inside a function) */
-int lbl; /* label counter for generated labels */
-int cclbl; /* label counter for generated cicle labels */
-int p, nciclo, nivel; /* cycles */
 %}
 
 %union {
