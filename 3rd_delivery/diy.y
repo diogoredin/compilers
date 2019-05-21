@@ -65,8 +65,8 @@ file	:
 	| file public CONST tipo ID ';'	{ IDnew($4->value.i+5, $5, 0); declare($2, 1, $4, $5, 0); }
 	| file public tipo ID init	{ IDnew($3->value.i, $4, 0); declare($2, 0, $3, $4, $5); declareEvaluate("TYPE", $4, $3->value.i, $5); }
 	| file public CONST tipo ID init	{ IDnew($4->value.i+5, $5, 0); declare($2, 1, $4, $5, $6); declareEvaluate("CONST", $5, $4->value.i, $6); }
-	| file public tipo ID { fsize = -4*dim($3); enter($2, $3->value.i, $4);  } finit { function($2, $3, $4, $6); functionEvaluate($4, -pos, $6); }
-	| file public VOID ID { fsize = 0; enter($2, 4, $4); } finit { function($2, intNode(VOID, 4), $4, $6); functionEvaluate($4, -pos, $6); }
+	| file public tipo ID { fsize = -4*dim($3); /* Save space for return value */ enter($2, $3->value.i, $4); } finit { function($2, $3, $4, $6); functionEvaluate($4, -pos, $6); }
+	| file public VOID ID { fsize = 0; /* Void doesnt need space for return value */ enter($2, 4, $4); } finit { function($2, intNode(VOID, 4), $4, $6); functionEvaluate($4, -pos, $6); }
 	;
 
 public	:         { $$ = 0; }
@@ -91,8 +91,8 @@ init	: ATR ID ';'		{ $$ = strNode(ID, $2); $$->info = IDfind($2, 0) + 10; }
 	| ATR '-' REAL ';'	{ $$ = realNode(REAL, -$3); $$->info = 3; }
         ;
 
-finit   : '(' { pos = 8; } params { pos = fsize; } ')' blocop 	{ $$ = binNode('(', $6, $3); }
-	| '(' ')' { pos = fsize; } blocop        											{ $$ = binNode('(', $4, 0); }
+finit   : '(' { pos = 8; } params { pos = fsize; } ')' blocop 	{ /* Start in fsize that saves return */ $$ = binNode('(', $6, $3); }
+	| '(' ')' { pos = fsize; } blocop        											{ /* Start in fsize that saves return */ $$ = binNode('(', $4, 0); }
 	;
 
 blocop  : ';'   { $$ = nilNode(NIL); }
@@ -114,7 +114,6 @@ param	: tipo ID  { $$ = binNode(PARAM, $1, strNode(ID, $2));
 
 									/* Arguments are higher than 8 */
 									if (pos > 8 || pos == 8) {
-										printf("Argument of Function -> %d\n", pos);
 										IDnew($1->value.i, $2, pos);
 										if (IDlevel() == 1) fpar[++fpar[0]] = $1->value.i;
 										pos += 4 * dim($1);
@@ -122,7 +121,6 @@ param	: tipo ID  { $$ = binNode(PARAM, $1, strNode(ID, $2));
 									/* Local variables are negative */
 									} else if (pos < 0 || pos == 0) {
 										pos -= 4 * dim($1);
-										printf("Local Variable -> %d", pos);
 										IDnew($1->value.i, $2, pos);
 										if (IDlevel() == 1) fpar[++fpar[0]] = $1->value.i;
 									}
@@ -228,8 +226,8 @@ char **yynames =
 		 0;
 #endif
 
+/** All node types occupy one bit except double (type 3) */
 static int dim(Node *n) {
-	/** Value.i number type. 8 is double (3) occupies 2 bytes */
   return (n->value.i == 3) ? 2 : 1;
 }
 
