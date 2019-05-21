@@ -1,0 +1,41 @@
+public void println()
+public void prints(string i)
+public void printi(integer i)
+
+==integer i;
+==public integer j;
+
+public string givehello() {
+	givehello := "hello\n";
+};
+
+public integer entry (integer argc, string *argv, string *envp) {
+	integer d;
+	string a;
+	string b;
+	string c;
+	a := "what is this string?\n"
+	prints("a: ");
+	prints(a);
+	prints("a := givehello() := ");
+	prints(a := givehello());
+	c := b := a;
+	prints("c: ");
+	prints(c);
+	prints("b: ");
+	prints(b);
+	a := "agg";
+	b := "bcc";
+	prints("a < b ? ");
+	printi(a < b);
+	println();
+	prints("a > b ? ");
+	printi(a > b);
+	println();
+	prints("hello world\n");
+	d := 81;
+	a := &d;
+	prints(a);
+	println();
+	entry := 0;
+};

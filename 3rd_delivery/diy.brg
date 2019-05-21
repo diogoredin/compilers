@@ -60,7 +60,7 @@ stmt: WHILE(do,stmt) 1			{ brkcnt--; fprintf(yyout, pfJMP pfLABEL, mklbl(LEFT_CH
 do:	DO(begin,expr) 1			{ p->place = (brklbl[++brkcnt] = ++lbl); fprintf(yyout, pfJZ, mklbl(lbl)); }
 begin: START 1					{ p->place = ++lbl; fprintf(yyout, pfLABEL, mklbl(lbl)); }
 
-%! Arguments and expressions
+%! Arguments and Expressions
 args: COM(expr,args) 1			{}
 args: COM(expr,NIL) 1			{}
 expr: CALL(ID,args) 1			{ fprintf(yyout, pfCALL pfTRASH pfPUSH, mkfunc(LEFT_CHILD(p)->value.s), (int)(pfWORD*(RIGHT_CHILD(p)->place))); }
@@ -78,7 +78,7 @@ lval: ID 1                    	{ fprintf(yyout, pfLOCAL, p->user); /* position c
 
 %! Atribution
 assign: expr 1                	{ fprintf(yyout, pfDUP); }
-expr: ATR(assign,lval) 1		{ fprintf(yyout, pfSTORE); }
+expr: ATR(assign,lval) 1		{ fprintf(yyout, pfSTORE); /* Allows assignments of assignments */ }
 
 %! Operations with Expressions
 expr: ADD(expr,expr) 1        	{ fprintf(yyout, pfADD); }
@@ -96,6 +96,12 @@ expr: AND(and,expr) 1         	{ fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(p)->pl
 and: expr 1                  	{ p->place = ++lbl; fprintf(yyout, pfDUP pfJZ pfTRASH, mklbl(p->place), pfWORD); }
 expr: OR(or,expr) 1           	{ fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(p)->place)); }
 or:	expr 1                    	{ p->place = ++lbl; fprintf(yyout, pfDUP pfJNZ pfTRASH, mklbl(p->place), pfWORD); }
+
+%! Increment and Decrement
+expr: INCR(lval) 1				{ fprintf(yyout, pfDUP pfINCR pfLOAD, 1); }
+expr: DECR(lval) 1				{ fprintf(yyout, pfDUP pfDECR pfLOAD, 1); }
+expr: POSINC(lval) 1			{ fprintf(yyout, pfDUP pfLOAD pfSWAP pfINCR, 1); }
+expr: POSDEC(lval) 1			{ fprintf(yyout, pfDUP pfLOAD pfSWAP pfDECR, 1); }
 
 %%
 

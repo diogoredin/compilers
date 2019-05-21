@@ -1,0 +1,32 @@
+public void println()
+public void prints(string i)
+public void printi(integer i)
+
+public integer entry (integer argc, string *argv, string *envp) {
+	integer i;
+	integer j;
+	integer k;
+	for i in 0 upto 4 step 1 do {
+
+
+		for j in 0 upto 4 step 1 do {
+
+			for k in 0 upto 4 step 2 do {
+				prints("k -> ");
+				printi(k);
+				println();
+
+				==prints("3rd for\n");
+			}
+			prints("j -> ");
+			printi(j);
+			println();
+		==prints("2nd for\n");
+		}
+		==prints("1st for\n");
+		prints("i -> ");
+		printi(i);
+		println();
+	}
+	entry:= 0;
+};

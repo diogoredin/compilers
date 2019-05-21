@@ -1,0 +1,39 @@
+public void println()
+public void prints(string i)
+public void printi(integer i)
+
+public integer entry (integer argc, string *argv, string *envp) {
+	integer i;
+	integer j;
+	integer k;
+	i := 2;
+	j := 3
+	if (i > 1 & i < 5) then {
+		prints("in if\n");
+	}
+	else {
+		prints("in else\n");
+	}
+	do {
+		j:= 3;
+		do {
+			k := 3;
+			do {
+				prints("inner inner for\n");
+				k++;
+				if(k = 5) then{
+					prints("will break\n");
+					continue 1;
+				}
+
+			}while k < 5
+			prints("inner  for\n");
+			j++;
+		}while (j < 10)
+		prints("for\n")
+		i++;
+	}while (i < 7)
+
+	prints("not in for\n");
+	entry := 0;
+};

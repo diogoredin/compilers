@@ -1,0 +1,46 @@
+public void printd(number d)
+public void println()
+public void printi(integer i)
+
+public number hello() {
+	hello := 7.4;
+};
+
+
+public integer entry (integer argc, string *argv, string *envp) {
+	number a;
+	number b;
+	number c;
+	a := 3.4;
+	printd(a);
+	println();
+	b := 2.7;
+	c := a + b;
+	printd(c);
+	println();
+	a := b := c;
+	printd(b);
+	println();
+	printd(a);
+	println();
+	printd(c);
+	println();
+	printi(a = c);
+	println();
+	printi(a < c - 3.0);
+	println();
+	printi(a > 1 + 1 + 1);
+	println();
+	c := a + b;
+	printd(c + 7);
+	println();
+	c := 2;
+	printd(c);
+	println();
+	printi(a > 3);
+	println();
+	c := hello();
+	printd(c);
+	println();
+	entry:= 0;
+};
