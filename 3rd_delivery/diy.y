@@ -15,9 +15,11 @@ int checkargs(char *name, Node *args);
 int nostring(Node *arg1, Node *arg2);
 int intonly(Node *arg, int);
 int noassign(Node *arg1, Node *arg2);
+static int dim(Node *n);
 static int ncicl;
 static char *fpar;
-int pos;
+static int pos;
+static int fsize;
 
 extern void evaluate(Node *p);
 extern void functionEvaluate(char *name, int enter, Node *body);
@@ -63,8 +65,8 @@ file	:
 	| file public CONST tipo ID ';'	{ IDnew($4->value.i+5, $5, 0); declare($2, 1, $4, $5, 0); }
 	| file public tipo ID init	{ IDnew($3->value.i, $4, 0); declare($2, 0, $3, $4, $5); declareEvaluate("TYPE", $4, $3->value.i, $5); }
 	| file public CONST tipo ID init	{ IDnew($4->value.i+5, $5, 0); declare($2, 1, $4, $5, $6); declareEvaluate("CONST", $5, $4->value.i, $6); }
-	| file public tipo ID { enter($2, $3->value.i, $4); } finit { function($2, $3, $4, $6); functionEvaluate($4, $3->value.i, $6); }
-	| file public VOID ID { enter($2, 4, $4); } finit { function($2, intNode(VOID, 4), $4, $6); functionEvaluate($4, 4, $6); }
+	| file public tipo ID { fsize = -4*dim($3); enter($2, $3->value.i, $4);  } finit { function($2, $3, $4, $6); functionEvaluate($4, -pos, $6); }
+	| file public VOID ID { fsize = 0; enter($2, 4, $4); } finit { function($2, intNode(VOID, 4), $4, $6); functionEvaluate($4, -pos, $6); }
 	;
 
 public	:         { $$ = 0; }
@@ -89,8 +91,8 @@ init	: ATR ID ';'		{ $$ = strNode(ID, $2); $$->info = IDfind($2, 0) + 10; }
 	| ATR '-' REAL ';'	{ $$ = realNode(REAL, -$3); $$->info = 3; }
         ;
 
-finit   : '(' params ')' blocop { $$ = binNode('(', $4, $2); }
-	| '(' ')' blocop        { $$ = binNode('(', $3, 0); }
+finit   : '(' { pos = 8; } params { pos = fsize; } ')' blocop 	{ $$ = binNode('(', $6, $3); }
+	| '(' ')' { pos = fsize; } blocop        											{ $$ = binNode('(', $4, 0); }
 	;
 
 blocop  : ';'   { $$ = nilNode(NIL); }
@@ -105,14 +107,27 @@ bloco	: '{' { IDpush(); } decls list end '}'    { $$ = binNode('{', $5 ? binNode
 	;
 
 decls	:                       { $$ = nilNode(NIL); }
-	| decls param ';'       { $$ = binNode(';', $1, $2); }
+	| decls param ';'       		{ $$ = binNode(';', $1, $2); }
 	;
 
-param	: tipo ID               { $$ = binNode(PARAM, $1, strNode(ID, $2));
-                                  IDnew($1->value.i, $2, 0);
-                                  if (IDlevel() == 1) fpar[++fpar[0]] = $1->value.i;
-                                }
-	;
+param	: tipo ID  { $$ = binNode(PARAM, $1, strNode(ID, $2));
+
+									/* Arguments are higher than 8 */
+									if (pos > 8 || pos == 8) {
+										printf("Argument of Function -> %d\n", pos);
+										IDnew($1->value.i, $2, pos);
+										if (IDlevel() == 1) fpar[++fpar[0]] = $1->value.i;
+										pos += 4 * dim($1);
+
+									/* Local variables are negative */
+									} else if (pos < 0 || pos == 0) {
+										pos -= 4 * dim($1);
+										printf("Local Variable -> %d", pos);
+										IDnew($1->value.i, $2, pos);
+										if (IDlevel() == 1) fpar[++fpar[0]] = $1->value.i;
+									}
+
+								};
 
 stmt	: base
 	| brk
@@ -156,7 +171,7 @@ args	: expr		{ $$ = binNode(',', $1, nilNode(NIL)); }
 lv	: ID		{ long pos; int typ = IDfind($1, &pos);
                           if (pos == 0) $$ = strNode(ID, $1);
                           else $$ = intNode(LOCAL, pos);
-			  $$->info = typ; $$->user = (int*)pos;
+			  $$->info = typ;
 			}
 	| ID '[' expr ']' { Node *n;
                             long pos; int siz, typ = IDfind($1, &pos);
@@ -213,6 +228,11 @@ char **yynames =
 		 0;
 #endif
 
+static int dim(Node *n) {
+	/** Value.i number type. 8 is double (3) occupies 2 bytes */
+  return (n->value.i == 3) ? 2 : 1;
+}
+
 /******************************************************************
 *
 *		NODE CREATION
@@ -249,7 +269,7 @@ void enter(int pub, int typ, char *name) {
 	if (IDfind(name, (long*)IDtest) < 20)
 		IDnew(typ+20, name, (long)fpar);
 	IDpush();
-	if (typ != 4) IDnew(typ, name, 0);
+	if (typ != 4) IDnew(typ, name, fsize);
 }
 
 /******************************************************************

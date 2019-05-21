@@ -43,7 +43,7 @@ decls: NIL 1					{}
 decls: END(decls,param) 1		{}
 base: VOID 1 					{}
 base: NIL 1 					{}
-base: expr 1					{ fprintf(yyout, pfTRASH, pfWORD); }
+base: expr 1					{}
 base: block 1					{}
 
 %! If Then Else
@@ -70,14 +70,14 @@ expr: INT 1						{ fprintf(yyout, pfIMM, p->value.i); }
 expr: REAL 1					{}
 
 %! lvalues
-expr: PTR(lval)               	{ /* No code, but keep PTR to avoid missing LOADs */ }
+expr: PTR(lval)               	{ fprintf(yyout, pfLOAD); }
 lval: INDEX(lvec,expr) 1      	{ fprintf(yyout, pfIMM pfMUL pfADD, pfWORD); }
 lvec: lval 1                  	{ fprintf(yyout, pfLOAD); }
-lval: LOCAL 1                 	{ fprintf(yyout, pfADDR, p->value.s); }
-lval: ID 1                    	{ fprintf(yyout, pfLOCAL, p->user); /* position calculated in yacc */ }
+lval: LOCAL 1                 	{ fprintf(yyout, pfLOCAL, p->value.i); }
+lval: ID 1                    	{ fprintf(yyout, pfADDR, p->value.s); /* position calculated in yacc */ }
 
 %! Atribution
-assign: expr 1                	{ fprintf(yyout, pfDUP); }
+assign: expr 1                	{}
 expr: ATR(assign,lval) 1		{ fprintf(yyout, pfSTORE); /* Allows assignments of assignments */ }
 
 %! Operations with Expressions
@@ -160,17 +160,11 @@ void evaluate(Node *p) {
 void functionEvaluate(char *name, int enter, Node *body) {
 
 	int i;
-	int overflow = 32;
 	int IDPosition = IDfind(name,0);
 
 	/* Print Tree of function */
 	extern int trace;
 	printNode(body, stdout, yynames);
-
-	/* Stack overflow */
-	if (IDPosition > overflow) {
-		IDPosition = IDPosition - overflow;
-	}
 
 	/* Left Child is blocop */
 	if (LEFT_CHILD(body)->value.s == 0 || LEFT_CHILD(body)->attrib == NIL) {
@@ -194,7 +188,7 @@ void functionEvaluate(char *name, int enter, Node *body) {
 
 		/* Return functions */
 		if (IDPosition != 0) {
-			fprintf(yyout, pfLOCAL pfPOP pfLEAVE pfRET, -4); /* -4 assumes int */
+			fprintf(yyout, pfLOCAL pfLOAD pfPOP pfLEAVE pfRET, -4); /* -4 assumes int */
 		} else {
 			fprintf(yyout, pfLEAVE pfRET);
 		}
@@ -206,13 +200,7 @@ void functionEvaluate(char *name, int enter, Node *body) {
 void declareEvaluate(char *type, char *name, int enter, Node *init) {
 
 	int i;
-	int overflow = 32;
 	int IDPosition = IDfind(name,0);
-
-	/* Stack overflow */
-	if (IDPosition > overflow) {
-		IDPosition = IDPosition - overflow;
-	}
 
 	/* CONST */
 	if (strcmp(type, "CONST") == 0) {
