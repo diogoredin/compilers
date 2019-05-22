@@ -29,6 +29,7 @@ func: FUNC(blockp,params) 1		{}
 params: param 1 				{}
 params: COM(params,param) 1 	{}
 param: PARAM(type,ID) 1			{}
+param: NIL 1					{}
 type: INTEGER 1 				{}
 type: STRING 1 					{}
 type: NUMBER 1 					{}

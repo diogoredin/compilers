@@ -3,8 +3,10 @@ public void println()
 
 public integer entry (integer argc, string *argv, string *envp) {
 	integer i
+	integer v
 
-	i := 3;
+	v := 10
+	i := 3 * 4 * v;
 	printi(i)
 	println()
 
