@@ -21,7 +21,6 @@ static char *fpar;
 static int pos;
 static int fsize;
 
-extern void evaluate(Node *p);
 extern void functionEvaluate(char *name, int enter, Node *body);
 extern void declareEvaluate(char *type, char *name, int enter, Node *init);
 

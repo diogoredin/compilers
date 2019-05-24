@@ -7,8 +7,7 @@ public integer hello() {
 
 public integer entry (integer argc, string *argv, string *envp) {
 	integer c
-	c := 1
+	c := hello()
 	printi(c)
-	println()
 	entry:= 0
 };
