@@ -1,13 +1,13 @@
 public void println()
 public void printi(integer i)
 
-public integer hello() {
-	hello := 7
+public string hello(integer d) {
+	hello := d
 };
 
 public integer entry (integer argc, string *argv, string *envp) {
 	integer c
-	c := hello()
+	c := hello(7)
 	printi(c)
 	entry:= 0
 };
