@@ -91,7 +91,7 @@ init	: ATR ID ';'		{ $$ = strNode(ID, $2); $$->info = IDfind($2, 0) + 10; }
         ;
 
 finit   : '(' { pos = 8; } params { pos = fsize; } ')' blocop 	{ /* Start in fsize that saves return */ $$ = binNode('(', $6, $3); }
-	| '(' ')' { pos = fsize; } blocop        											{ /* Start in fsize that saves return */ $$ = binNode('(', $4, 0); }
+	| '(' ')' { pos = fsize; } blocop        											{ /* Start in fsize that saves return */ $$ = binNode('(', $4, nilNode(NIL)); }
 	;
 
 blocop  : ';'   { $$ = nilNode(NIL); }

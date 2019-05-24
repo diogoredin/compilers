@@ -29,6 +29,7 @@ func: FUNC(blockp,params) 1		{}
 params: param 1 				{}
 params: COM(params,param) 1 	{}
 param: PARAM(type,ID) 1			{}
+params: NIL 1					{}
 param: NIL 1					{}
 type: INTEGER 1 				{}
 type: STRING 1 					{}
@@ -65,7 +66,7 @@ begin: START 1					{ p->place = ++lbl; fprintf(yyout, pfLABEL, mklbl(lbl)); }
 args: COM(expr,args) 1			{}
 args: COM(expr,NIL) 1			{}
 expr: CALL(ID,args) 1			{ fprintf(yyout, pfCALL pfTRASH pfPUSH, mkfunc(LEFT_CHILD(p)->value.s), (int)(pfWORD*(RIGHT_CHILD(p)->place))); }
-expr: CALL(ID,VOID) 1			{ fprintf(yyout, pfCALL, mkfunc(LEFT_CHILD(p)->value.s)); }
+expr: CALL(ID,VOID) 1			{ fprintf(yyout, pfCALL pfPUSH, mkfunc(LEFT_CHILD(p)->value.s)); }
 expr: STR 1						{ lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL, mklbl(lbl)); outstr(p->value.s); fprintf(yyout, pfTEXT pfADDR, mklbl(lbl)); }
 expr: INT 1						{ fprintf(yyout, pfIMM, p->value.i); }
 expr: REAL 1					{}
