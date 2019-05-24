@@ -1,7 +1,7 @@
 public void println()
 public void printi(integer i)
 
-public string hello(integer d) {
+public integer hello(integer d) {
 	hello := d
 };
 
@@ -9,5 +9,6 @@ public integer entry (integer argc, string *argv, string *envp) {
 	integer c
 	c := hello(7)
 	printi(c)
+	println()
 	entry:= 0
 };

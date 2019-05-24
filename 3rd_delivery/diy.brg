@@ -54,7 +54,7 @@ stmt: BREAK 1					{}
 stmt: CONTINUE 1				{}
 base: if 1						{}
 if: IF(cond,stmt) 1				{ p->place = ++lbl; fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(p)->place)); }
-base: ELSE(if, stmt) 1			{ fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(p)->place)); }
+base: ELSE(if,stmt) 1			{ fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(p)->place)); }
 cond: expr 1					{ p->place = ++lbl; fprintf(yyout, pfJZ, mklbl(p->place)); }
 
 %! While and Do

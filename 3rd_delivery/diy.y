@@ -225,9 +225,9 @@ char **yynames =
 		 0;
 #endif
 
-/** All node types occupy one bit except double (type 3) */
+/** All node types occupy one bit except nodeStr */
 static int dim(Node *n) {
-  return (n->value.i == 3) ? 2 : 1;
+  return (n->value.i == nodeStr) ? 2 : 1;
 }
 
 /******************************************************************
