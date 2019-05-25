@@ -49,7 +49,7 @@ base: expr 1					{}
 base: block 1					{}
 
 %! If Then Else
-stmt: base 1					{}
+stmt: base 1					{ fprintf(yyout, pfTRASH, pfWORD); }
 stmt: BREAK 1					{}
 stmt: CONTINUE 1				{}
 base: if 1						{}
@@ -63,9 +63,9 @@ do:	DO(begin,expr) 1			{ p->place = (brklbl[++brkcnt] = ++lbl); fprintf(yyout, p
 begin: START 1					{ p->place = ++lbl; fprintf(yyout, pfLABEL, mklbl(lbl)); }
 
 %! Arguments and Expressions
-args: COM(expr,args) 1			{}
-args: COM(expr,NIL) 1			{}
-expr: CALL(ID,args) 1			{ fprintf(yyout, pfCALL pfTRASH pfPUSH, mkfunc(LEFT_CHILD(p)->value.s), (int)(pfWORD*(RIGHT_CHILD(p)->place))); }
+args: COM(expr,args) 1			{ p->place = (1+(RIGHT_CHILD(p)->place)); }
+args: COM(expr,NIL) 1			{ p->place = 1; /* or 2 for others */ }
+expr: CALL(ID,args) 1			{ fprintf(yyout, pfCALL pfTRASH pfPUSH, mkfunc(LEFT_CHILD(p)->value.s), pfWORD*(int)(RIGHT_CHILD(p)->place)); /* assumes int */ }
 expr: CALL(ID,VOID) 1			{ fprintf(yyout, pfCALL pfPUSH, mkfunc(LEFT_CHILD(p)->value.s)); }
 expr: STR 1						{ lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL, mklbl(lbl)); outstr(p->value.s); fprintf(yyout, pfTEXT pfADDR, mklbl(lbl)); }
 expr: INT 1						{ fprintf(yyout, pfIMM, p->value.i); }
@@ -79,7 +79,7 @@ lval: LOCAL 1                 	{ fprintf(yyout, pfLOCAL, p->value.i); }
 lval: ID 1                    	{ fprintf(yyout, pfADDR, p->value.s); /* position calculated in yacc */ }
 
 %! Atribution
-assign: expr 1                	{}
+assign: expr 1                	{ fprintf(yyout, pfDUP); /* Duplicates result on top of stack */ }
 expr: ATR(assign,lval) 1		{ fprintf(yyout, pfSTORE); /* Allows assignments of assignments */ }
 
 %! Operations with Expressions
@@ -174,7 +174,7 @@ void functionEvaluate(char *name, int enter, Node *body) {
 
 		/* Return functions */
 		if (IDPosition != 0) {
-			fprintf(yyout, pfLOCAL pfLOAD pfPOP pfLEAVE pfRET, -4); /* -4 assumes int */
+			fprintf(yyout, pfLOCAL pfLOAD pfPOP pfLEAVE pfRET, -4);
 		} else {
 			fprintf(yyout, pfLEAVE pfRET);
 		}
