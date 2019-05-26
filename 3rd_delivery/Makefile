@@ -9,6 +9,7 @@ CFLAGS=-g -DYYDEBUG
 
 $(LANG): $(LANG).y $(LANG).l $(LANG).brg
 	make -C $(LIB)
+	make -C $(RUN)
 	byacc -dv $(LANG).y
 	flex -l $(LANG).l
 	./pburg -T $(LANG).brg
