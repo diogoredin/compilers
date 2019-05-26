@@ -1,0 +1,12 @@
+public void prints(string s)
+public integer entry (integer argc, string *argv, string *envp) {
+  if 1 > 2 then
+    prints("false")
+  elif 3 > 2 then
+    prints("true")
+  elif 4 < 2 then
+    prints("false")
+  else
+    prints("end")
+  entry := 0
+};

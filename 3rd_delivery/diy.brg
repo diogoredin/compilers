@@ -49,6 +49,12 @@ base: expr 1					{}
 base: block 1					{}
 
 %! If Then Else
+
+stmt: elif 1					{}
+elif: ELIF(cond,stmt) 1			{ fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(p)->place)); }
+elif: ELIFS(elif,elif) 1		{}
+elif: ELIFS(elif,stmt) 1		{}
+
 stmt: base 1					{ fprintf(yyout, pfTRASH, pfWORD); }
 stmt: BREAK 1					{}
 stmt: CONTINUE 1				{}

@@ -39,7 +39,7 @@ extern void declareEvaluate(char *type, char *name, int enter, Node *init);
 %token DO WHILE IF THEN FOR IN UPTO DOWNTO STEP BREAK CONTINUE
 %token VOID INTEGER STRING NUMBER CONST PUBLIC INCR DECR
 %nonassoc IFX
-%nonassoc ELSE
+%nonassoc ELSE ELIF ELIFS
 
 %right ATR
 %left '|'
@@ -53,7 +53,7 @@ extern void declareEvaluate(char *type, char *name, int enter, Node *init);
 %nonassoc '[' '('
 
 %type <n> tipo init finit blocop params
-%type <n> bloco decls param base stmt step args list end brk lv expr
+%type <n> bloco decls param base stmt step args list end brk lv expr elif
 %type <i> ptr intp public
 
 %token LOCAL POSINC POSDEC PTR CALL START PARAM NIL
@@ -130,12 +130,17 @@ stmt	: base
 	| brk
 	;
 
+elif: ELSE stmt 										{ $$ = $2; }
+	| ELIF expr THEN stmt %prec IFX  	{ $$ = binNode(ELIF, $2, $4); }
+	| ELIF expr THEN stmt elif    		{ $$ = binNode(ELIFS, binNode(ELIF, $2, $4), $5); }
+	;
+
 base	: ';'                   { $$ = nilNode(VOID); }
 	| DO { ncicl++; } stmt WHILE expr ';' { $$ = binNode(WHILE, binNode(DO, nilNode(START), $3), $5); ncicl--; }
 	| FOR lv IN expr UPTO expr step DO { ncicl++; } stmt       { $$ = binNode(';', binNode(ATR, $4, $2), binNode(FOR, binNode(IN, nilNode(START), binNode(LE, uniNode(PTR, $2), $6)), binNode(';', $10, binNode(ATR, binNode('+', uniNode(PTR, $2), $7), $2)))); ncicl--; }
 	| FOR lv IN expr DOWNTO expr step DO { ncicl++; } stmt       { $$ = binNode(';', binNode(ATR, $4, $2), binNode(FOR, binNode(IN, nilNode(START), binNode(GE, uniNode(PTR, $2), $6)), binNode(';', $10, binNode(ATR, binNode('-', uniNode(PTR, $2), $7), $2)))); ncicl--; }
 	| IF expr THEN stmt %prec IFX    { $$ = binNode(IF, $2, $4); }
-	| IF expr THEN stmt ELSE stmt    { $$ = binNode(ELSE, binNode(IF, $2, $4), $6); }
+	| IF expr THEN stmt elif    { $$ = binNode(ELSE, binNode(IF, $2, $4), $5); }
 	| expr ';'              { $$ = $1; }
 	| bloco                 { $$ = $1; }
 	| lv '#' expr ';'       { $$ = binNode('#', $3, $1); }

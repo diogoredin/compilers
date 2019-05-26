@@ -31,6 +31,7 @@ FLT	[0-9]+\.[0-9]+([Ee][+-]?[0-9]+)?
 "if"			eoi = 0; return IF;
 "then"			eoi = 0; return THEN;
 "else"			eoi = 0; return ELSE;
+"elif"			eoi = 0; return ELIF;
 "while"			eoi = 0; return WHILE;
 "do"			eoi = 0; return DO;
 "for"			eoi = 0; return FOR;
