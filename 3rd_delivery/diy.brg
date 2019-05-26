@@ -94,6 +94,7 @@ expr: GE(expr,expr) 1         	{ fprintf(yyout, pfGE); }
 expr: LE(expr,expr) 1         	{ fprintf(yyout, pfLE); }
 expr: NE(expr,expr) 1         	{ fprintf(yyout, pfNE); }
 expr: EQU(expr,expr) 1        	{ fprintf(yyout, pfEQ); }
+expr: SHIFT(expr,expr) 1        { fprintf(yyout, pfSHTL); }
 expr: AND(and,expr) 1         	{ fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(p)->place)); }
 and: expr 1                  	{ p->place = ++lbl; fprintf(yyout, pfDUP pfJZ pfTRASH, mklbl(p->place), pfWORD); }
 expr: OR(or,expr) 1           	{ fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(p)->place)); }

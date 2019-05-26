@@ -48,7 +48,7 @@ extern void declareEvaluate(char *type, char *name, int enter, Node *init);
 %left '=' NE
 %left GE LE '>' '<'
 %left '+' '-'
-%left '*' '/' '%'
+%left '*' '/' '%' SHIFT
 %nonassoc UMINUS '!' NOT REF
 %nonassoc '[' '('
 
@@ -210,6 +210,7 @@ expr	: lv		{ $$ = uniNode(PTR, $1); $$->info = $1->info; }
 	| expr '=' expr { $$ = binNode('=', $1, $3); $$->info = 1; }
 	| expr '&' expr { $$ = binNode('&', $1, $3); $$->info = intonly($1, 0); intonly($3, 0); }
 	| expr '|' expr { $$ = binNode('|', $1, $3); $$->info = intonly($1, 0); intonly($3, 0); }
+	| expr SHIFT expr { $$ = binNode(SHIFT, $1, $3); $$->info = nostring($1, $3); }
 	| '(' expr ')' { $$ = $2; $$->info = $2->info; }
 	| ID '(' args ')' { $$ = binNode(CALL, strNode(ID, $1), $3);
                             $$->info = checkargs($1, $3); }

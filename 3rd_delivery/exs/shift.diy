@@ -1,0 +1,13 @@
+public void println()
+public void printi(integer i)
+public integer atoi(string s)
+
+public integer entry (integer argc, string *argv, string *envp) {
+  integer i
+  i := atoi(argv[1]) << 3
+
+  printi(i)
+  println()
+
+  entry := 0
+};
