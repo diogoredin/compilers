@@ -1,5 +1,0 @@
-public void prints(string s)
-public integer entry (integer argc, string *argv, string *envp) {
-  prints("olá pessoal!\n")
-  entry := 0
-};
