@@ -17,7 +17,7 @@ NASM=nasm -f$(SYS)
 all: $(RUNTIME) $(BOOT)
 	cp $^ $(DEST)
 
-$(RUNTIME): dbl.o $(OS)
+$(RUNTIME): dbl.o $(OS) grosa.o
 	ar crl $@ $?
 
 $(BOOT): dbl.o $(OS)

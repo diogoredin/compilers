@@ -1,0 +1,11 @@
+public void printi(integer i)
+public void println()
+public integer atoi(string s)
+public integer grosa (integer i)
+
+public integer entry (integer argc, string *argv, string *envp) {
+  integer i
+  i := grosa(200)
+  printi(i)
+  entry := 0
+};

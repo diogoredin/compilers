@@ -20,6 +20,7 @@ static int ncicl;
 static char *fpar;
 static int pos;
 static int fsize;
+static int flag;
 
 extern void functionEvaluate(char *name, int enter, Node *body);
 extern void declareEvaluate(char *type, char *name, int enter, Node *init);
@@ -37,13 +38,14 @@ extern void declareEvaluate(char *type, char *name, int enter, Node *init);
 %token <r> REAL
 %token <s> ID STR
 %token DO WHILE IF THEN FOR IN UPTO DOWNTO STEP BREAK CONTINUE
-%token VOID INTEGER STRING NUMBER CONST PUBLIC INCR DECR
+%token VOID INTEGER STRING NUMBER CONST PUBLIC INCR DECR RETURN
 %nonassoc IFX
 %nonassoc ELSE
 
 %right ATR
 %left '|'
 %left '&'
+%left BAND
 %nonassoc '~'
 %left '=' NE
 %left GE LE '>' '<'
@@ -64,8 +66,8 @@ file	:
 	| file public CONST tipo ID ';'	{ IDnew($4->value.i+5, $5, 0); declare($2, 1, $4, $5, 0); }
 	| file public tipo ID init	{ IDnew($3->value.i, $4, 0); declare($2, 0, $3, $4, $5); declareEvaluate("TYPE", $4, $3->value.i, $5); }
 	| file public CONST tipo ID init	{ IDnew($4->value.i+5, $5, 0); declare($2, 1, $4, $5, $6); declareEvaluate("CONST", $5, $4->value.i, $6); }
-	| file public tipo ID { fsize = -4*dim($3); /* Save space for return value */ enter($2, $3->value.i, $4); } finit { function($2, $3, $4, $6); functionEvaluate($4, -pos, $6); }
-	| file public VOID ID { fsize = 0; /* Void doesnt need space for return value */ enter($2, 4, $4); } finit { function($2, intNode(VOID, 4), $4, $6); functionEvaluate($4, -pos, $6); }
+	| file public tipo ID { flag = 1; fsize = -4*dim($3); /* Save space for return value */ enter($2, $3->value.i, $4); } finit { function($2, $3, $4, $6); functionEvaluate($4, -pos, $6); }
+	| file public VOID ID { flag = 0; fsize = 0; /* Void doesnt need space for return value */ enter($2, 4, $4); } finit { function($2, intNode(VOID, 4), $4, $6); functionEvaluate($4, -pos, $6); }
 	;
 
 public	:         { $$ = 0; }
@@ -140,6 +142,7 @@ base	: ';'                   { $$ = nilNode(VOID); }
 	| bloco                 { $$ = $1; }
 	| lv '#' expr ';'       { $$ = binNode('#', $3, $1); }
 	| error ';'       { $$ = nilNode(NIL); }
+	| RETURN ';'       { if (flag > 0) $$ = nilNode(RETURN); }
 	;
 
 end	:		{ $$ = 0; }
@@ -209,6 +212,7 @@ expr	: lv		{ $$ = uniNode(PTR, $1); $$->info = $1->info; }
 	| expr NE expr  { $$ = binNode(NE, $1, $3); $$->info = 1; }
 	| expr '=' expr { $$ = binNode('=', $1, $3); $$->info = 1; }
 	| expr '&' expr { $$ = binNode('&', $1, $3); $$->info = intonly($1, 0); intonly($3, 0); }
+	| expr BAND expr { $$ = binNode(BAND, $1, $3); $$->info = intonly($1, 0); intonly($3, 0); }
 	| expr '|' expr { $$ = binNode('|', $1, $3); $$->info = intonly($1, 0); intonly($3, 0); }
 	| '(' expr ')' { $$ = $2; $$->info = $2->info; }
 	| ID '(' args ')' { $$ = binNode(CALL, strNode(ID, $1), $3);

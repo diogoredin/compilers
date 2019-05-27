@@ -48,6 +48,8 @@ base: NIL 1 					{}
 base: expr 1					{}
 base: block 1					{}
 
+base: RETURN 1					{ fprintf(yyout, pfLOCAL pfLOAD pfPOP pfLEAVE pfRET, -4); }
+
 %! If Then Else
 stmt: base 1					{ fprintf(yyout, pfTRASH, pfWORD); }
 stmt: BREAK 1					{}
@@ -98,6 +100,8 @@ expr: AND(and,expr) 1         	{ fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(p)->pl
 and: expr 1                  	{ p->place = ++lbl; fprintf(yyout, pfDUP pfJZ pfTRASH, mklbl(p->place), pfWORD); }
 expr: OR(or,expr) 1           	{ fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(p)->place)); }
 or:	expr 1                    	{ p->place = ++lbl; fprintf(yyout, pfDUP pfJNZ pfTRASH, mklbl(p->place), pfWORD); }
+
+expr: BAND(expr,expr) 1 		{ fprintf(yyout, pfAND); }
 
 %! Increment and Decrement
 expr: INCR(lval) 1				{ fprintf(yyout, pfDUP pfINCR pfLOAD, 1); }

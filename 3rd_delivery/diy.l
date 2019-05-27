@@ -27,6 +27,7 @@ FLT	[0-9]+\.[0-9]+([Ee][+-]?[0-9]+)?
 ":="			eoi = 0; return ATR;
 "++"			eoi = 0; return INCR;
 "--"			eoi = 0; return DECR;
+"and"			eoi = 0; return BAND;
 "if"			eoi = 0; return IF;
 "then"			eoi = 0; return THEN;
 "else"			eoi = 0; return ELSE;
@@ -45,6 +46,7 @@ FLT	[0-9]+\.[0-9]+([Ee][+-]?[0-9]+)?
 "const"			eoi = 0; return CONST;
 "break"			eoi = 0; return BREAK;
 "continue"		eoi = 0; return CONTINUE;
+"return"		eoi = 0; return RETURN;
 
 [A-Za-z][A-Za-z0-9_]*	eoi = 1; yylval.s = strdup(yytext); return ID;
 \"([^"\\]|\\(.|\n))*\"	eoi = 1; yylval.s = malloc(yyleng); *yylval.s = 0; in = 1; REJECT;

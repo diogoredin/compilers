@@ -1,0 +1,7 @@
+public void prints(string s)
+
+public integer entry (integer argc, string *argv, string *envp) {
+  entry := 5
+  return ;
+  entry := 1
+};
